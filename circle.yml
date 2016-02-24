@@ -2,7 +2,7 @@ machine:
    java:
       version: oraclejdk8
    post:
-      - $PGP_KEY | base64 --decode -o ~/sec_key.gpg
+      - $PGP_KEY | base64 --decode > ~/sec_key.gpg
       - gpg --import --allow-secret-key-import ~/sec_key.gpg
       - rm ~/sec_key.gpg
       - mkdir -p ~/.gradle
