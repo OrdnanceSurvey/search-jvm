@@ -13,6 +13,7 @@ general:
     - "search-java/build/reports" # relative to the build directory
 
 test:
+    - ./gradlew clean test
 
 notify:
 
