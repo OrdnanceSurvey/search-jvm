@@ -1,0 +1,14 @@
+machine:
+  java:
+    version: oraclejdk8
+
+general:
+  artifacts:
+    - "search-java/build/reports" # relative to the build directory
+
+deployment:
+  master:
+    branch: master 
+    commands:
+      - ./gradlew clean test uploadArchives
+
