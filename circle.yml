@@ -1,10 +1,20 @@
 machine:
-  java:
-    version: oraclejdk8
+   java:
+      version: oraclejdk8
+   post:
+      - echo -e $PGP_KEY > ~/sec_key.pgp
+      - gpg --import --allow-secret-key-import ~/sec_key.gpg
+      - rm ~/sec_key.gpg
+      - mkdir -p ~/.gradle
+      - echo 'signing.keyId=FB77CA6B' > ~/.gradle/gradle.properties
 
 general:
   artifacts:
     - "search-java/build/reports" # relative to the build directory
+
+test:
+
+notify:
 
 deployment:
   master:
