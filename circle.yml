@@ -16,8 +16,9 @@ test:
    override:
       - ./gradlew clean test
    post:
+   # See: https://circleci.com/docs/test-metadata#metadata-collection-in-custom-test-steps
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
-    - cp -R search-java/build/test-results/* $CIRCLE_TEST_REPORTS
+    - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
 
 notify:
 
