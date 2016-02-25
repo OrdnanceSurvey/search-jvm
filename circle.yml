@@ -1,0 +1,32 @@
+machine:
+   java:
+      version: oraclejdk8
+   post:
+      - echo $PGP_KEY | base64 --decode > ~/sec_key.gpg
+      - gpg --import --allow-secret-key-import ~/sec_key.gpg
+      - rm ~/sec_key.gpg
+      - mkdir -p ~/.gradle
+      - echo "signing.keyId=$PGP_KEY_ID" >> ~/.gradle/gradle.properties
+      - echo "signing.password=$PGP_PASSWORD" >> ~/.gradle/gradle.properties
+      - echo "signing.secretKeyRingFile=$HOME/.gnupg/secring.gpg" >> ~/.gradle/gradle.properties
+
+general:
+  artifacts:
+    - "search-java/build/reports" # relative to the build directory
+
+test:
+   override:
+      - ./gradlew clean test
+   post:
+   # See: https://circleci.com/docs/test-metadata#metadata-collection-in-custom-test-steps
+    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+
+notify:
+
+deployment:
+  master:
+    branch: master 
+    commands:
+      - ./gradlew clean test uploadArchives
+
