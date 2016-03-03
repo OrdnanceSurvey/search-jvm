@@ -2,12 +2,14 @@
 
 **Master Build Status:** [![Circle CI](https://circleci.com/gh/OrdnanceSurvey/search-jvm/tree/master.svg?style=svg)](https://circleci.com/gh/OrdnanceSurvey/search-jvm/tree/master)
 
-This is a small search module that enables software clients to search:
+This library provides search results from:
 
 * Grid References
 * Latitude / Longitudes
 * [OS Open Names](https://www.ordnancesurvey.co.uk/business-and-government/products/os-open-names-api.html)
 * [OS Places](https://www.ordnancesurvey.co.uk/business-and-government/products/os-places/)
+
+It can be easily extended to include other data sources.
 
 ## Use it ##
 
@@ -66,6 +68,9 @@ Some example queries:
 * 51° 30' 26" N, 0° 7' 39" W
 * 51:30.433, -0:7.65
 * 51:30:26.0 -0:07:39.0
+* Edinburgh
+* London Road, Southampton
+* 10 Downing Street, London
 
 (commas and spaces can be used interchangeably)
 
@@ -76,6 +81,9 @@ Examples of output:
  * *name* SU 400 100 *context* Easting: 440000  Northing: 110000
  * *name* SU4010 *context* Easting: 440000  Northing: 110000
  * *name* SU41 *context* Easting: 440000  Northing: 110000
+ * *name* Edinburgh *context* Edinburgh, Scotland, EH1
+ * *name* London Road *context* Southampton, South East, England, SO15
+ * *name* 10 DOWNING STREET *context* LONDON, CITY OF WESTMINSTER, SW1A 2AA
 
 
 # Maintainer Repo Configuration #
