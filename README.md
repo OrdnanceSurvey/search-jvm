@@ -2,6 +2,8 @@
 
 **Master Build Status:** [![Circle CI](https://circleci.com/gh/OrdnanceSurvey/search-jvm/tree/master.svg?style=svg)](https://circleci.com/gh/OrdnanceSurvey/search-jvm/tree/master)
 
+**Test Coverage:** [![Coverage Status](https://coveralls.io/repos/github/OrdnanceSurvey/search-jvm/badge.svg?branch=master)](https://coveralls.io/github/OrdnanceSurvey/search-jvm?branch=master)
+
 This library provides search results from:
 
 * Grid References
