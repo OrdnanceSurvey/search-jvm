@@ -11,17 +11,22 @@ This is a small search module that enables software clients to search:
 
 include a gradle reference:
 
+```gradle
     compile 'uk.os.search:search:0.1.0'
+```
 
 build the search manager:
 
+```java
     SearchManager searchManager = new SearchManager.Builder()
         .addPlaces("places-api-key")
         .addOpenNames("open-names-api-key")
         .build();
+```
 
 Use it:
 
+```java
     String value = "SU400100";
 
     mSubscription = mSearchManager.query(value)
@@ -43,7 +48,7 @@ Use it:
             mSubscription = null;
             }
         });
-
+```
 
 Some example queries:
 
