@@ -4,8 +4,10 @@
 
 This is a small search module that enables software clients to search:
 
-* Latitude / Longitudes
 * Grid References
+* Latitude / Longitudes
+* [OS Open Names](https://www.ordnancesurvey.co.uk/business-and-government/products/os-open-names-api.html)
+* [OS Places](https://www.ordnancesurvey.co.uk/business-and-government/products/os-places/)
 
 ## Use it ##
 
