@@ -1,3 +1,12 @@
+// ---------------------------------------------------------------------------------------------------------------------
+// - Integration Test
+// - https://dzone.com/articles/integration-testing-with-gradle
+// ---------------------------------------------------------------------------------------------------------------------
+plugins {
+    id 'org.unbroken-dome.test-sets' version '1.2.0'
+}
+// ---------------------------------------------------------------------------------------------------------------------
+
 apply plugin: 'maven'
 apply plugin: 'java'
 apply plugin: 'signing'
@@ -36,9 +45,15 @@ sourceSets {
 dependencies {
     compile 'javax.inject:javax.inject:1'
     compile 'com.esri.geometry:esri-geometry-api:1.2'
-    compile 'com.squareup.retrofit:retrofit:1.9.0'
+    compile 'com.google.code.gson:gson:2.6.1'
+    compile 'com.squareup.retrofit2:adapter-rxjava:2.0.0-beta4'
+    compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta4'
+    compile 'com.squareup.retrofit2:retrofit:2.0.0-beta4'
     compile 'io.reactivex:rxjava:1.1.1'
     testCompile 'junit:junit:4.12'
+    testCompile 'com.squareup.okhttp3:mockwebserver:3.1.2'
+    testCompile 'org.mockito:mockito-all:2.0.2-beta'
+
 }
 // end::dependencies[]
 
@@ -144,3 +159,19 @@ artifacts {
 signing {
     sign configurations.archives
 }
+
+// Better language level support is near
+// https://docs.gradle.org/current/release-notes#enhanced-support-for-developing-java-projects-in-intellij-idea-and-eclipse
+// Gradle 2.11 support https://issues.gradle.org/browse/GRADLE-2198
+sourceCompatibility = '1.7'
+targetCompatibility = '1.7'
+
+
+// ---------------------------------------------------------------------------------------------------------------------
+// - Integration Test
+// - https://dzone.com/articles/integration-testing-with-gradle
+// ---------------------------------------------------------------------------------------------------------------------
+testSets {
+    testi
+}
+// ---------------------------------------------------------------------------------------------------------------------
