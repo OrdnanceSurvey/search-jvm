@@ -7,6 +7,12 @@ plugins {
 }
 // ---------------------------------------------------------------------------------------------------------------------
 
+// coverage reporting
+plugins {
+    id "jacoco"
+    id "com.github.kt3k.coveralls" version "2.5.0"
+}
+
 apply plugin: 'maven'
 apply plugin: 'java'
 apply plugin: 'signing'
@@ -175,3 +181,11 @@ testSets {
     testi
 }
 // ---------------------------------------------------------------------------------------------------------------------
+
+// coverage reporting
+jacocoTestReport {
+    reports {
+        xml.enabled = true // coveralls plugin depends on xml format report
+        html.enabled = true
+    }
+}
