@@ -15,7 +15,10 @@ include a gradle reference:
 
 build the search manager:
 
-    SearchManager searchManager = SearchManager.getInstance();
+    SearchManager searchManager = new SearchManager.Builder()
+        .addPlaces("places-api-key")
+        .addOpenNames("open-names-api-key")
+        .build();
 
 Use it:
 
