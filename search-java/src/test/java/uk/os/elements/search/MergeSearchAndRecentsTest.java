@@ -65,7 +65,7 @@ public class MergeSearchAndRecentsTest {
         assertEquals(expected, actual);
 
         SearchResult third = searchBundle.getRemaining().get(2);
-        recentsManager.saveRecent(third);
+        recentsManager.saveRecent(third).toBlocking().subscribe();
 
         searchBundle = query(searchManager, query);
         actual = searchBundle.getRecents().size();
@@ -89,7 +89,7 @@ public class MergeSearchAndRecentsTest {
         assertEquals(expected, actual);
 
         SearchResult sr = searchBundle.getRemaining().get(0);
-        recentsManager.saveRecent(sr);
+        recentsManager.saveRecent(sr).toBlocking().subscribe();
         searchBundle = query(searchManager, query);
         actual = searchBundle.getRecents().size();
         expected = 1;
@@ -110,7 +110,7 @@ public class MergeSearchAndRecentsTest {
         assertFalse(hasErrors);
 
         SearchResult third = searchBundle.getRemaining().get(2);
-        recentsManager.saveRecent(third);
+        recentsManager.saveRecent(third).toBlocking().subscribe();
 
         searchManager = getBrokenSearchManagerImpl(recentsManager);
         searchBundle = query(searchManager, query);

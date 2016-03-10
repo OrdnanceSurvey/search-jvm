@@ -33,8 +33,8 @@ import uk.os.elements.search.android.providers.Provider;
 public class RecentsManagerImpl implements Provider, RecentsManager {
 
     // TODO: either use guava or rationalise what is happening
-    private Map<String, SearchResult> mIndex = new HashMap<>();
-    private List<SearchResult> mSearchResults = new ArrayList<>();
+    private Map<String, SearchResult> mIndex = Collections.synchronizedMap(new HashMap<String, SearchResult>());
+    private List<SearchResult> mSearchResults = Collections.synchronizedList(new ArrayList<SearchResult>());
 
     @Override
     public Observable<List<SearchResult>> last(int maxResults) {
@@ -94,7 +94,6 @@ public class RecentsManagerImpl implements Provider, RecentsManager {
             public void call(Subscriber<? super List<SearchResult>> subscriber) {
                 try {
                     List<SearchResult> results = new ArrayList<>();
-
                     synchronized (mSearchResults) {
                         for (String id : ids) {
                             if (mIndex.containsKey(id)) {
@@ -142,10 +141,10 @@ public class RecentsManagerImpl implements Provider, RecentsManager {
                             mSearchResults.remove(oldest);
                             mIndex.remove(oldestKey);
                         }
+                    }
 
-                        if (!subscriber.isUnsubscribed()) {
-                            subscriber.onCompleted();
-                        }
+                    if (!subscriber.isUnsubscribed()) {
+                        subscriber.onCompleted();
                     }
                 } catch (Exception e) {
                     if (!subscriber.isUnsubscribed()) {
@@ -175,9 +174,9 @@ public class RecentsManagerImpl implements Provider, RecentsManager {
                                 break;
                             }
                         }
-                        if (!subscriber.isUnsubscribed()) {
-                            subscriber.onCompleted();
-                        }
+                    }
+                    if (!subscriber.isUnsubscribed()) {
+                        subscriber.onCompleted();
                     }
                 } catch (Exception e) {
                     if (!subscriber.isUnsubscribed()) {
