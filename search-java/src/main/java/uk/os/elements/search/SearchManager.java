@@ -29,42 +29,75 @@ import rx.functions.Func2;
 import rx.functions.FuncN;
 import uk.os.elements.search.android.providers.Provider;
 import uk.os.elements.search.android.providers.ProviderResponse;
+import uk.os.elements.search.android.providers.addresses.AddressesProvider;
 import uk.os.elements.search.android.providers.bng.GridReferenceProvider;
 import uk.os.elements.search.android.providers.latlon.LatLonProvider;
+import uk.os.elements.search.android.providers.opennames.OpennamesProvider;
 import uk.os.elements.search.android.providers.recents.RecentUtils;
 import uk.os.elements.search.android.providers.recents.RecentsManager;
 
 public class SearchManager {
 
+    public static final class Builder {
+        List<Provider> providers = new ArrayList<>();
+        RecentsManager recentsManager;
+
+        public Builder() {
+            providers.addAll(Arrays.asList(getDefaultProviders()));
+            recentsManager = null;
+        }
+
+        public Builder setProviders(List<Provider> providers) {
+            this.providers = providers;
+            return this;
+        }
+
+        public Builder setProviders(Provider... providers) {
+            this.providers = Arrays.asList(providers);
+            return this;
+        }
+
+        public Builder addOpenNames(String apiKey) {
+            this.providers.add(new OpennamesProvider.Builder(apiKey).build());
+            return this;
+        }
+
+        public Builder addPlaces(String apiKey) {
+            this.providers.add(new AddressesProvider.Builder(apiKey).build());
+            return this;
+        }
+
+        /**
+         * @param recentsManager to be used by the {@link SearchManager}
+         * @return this builder for fluent construction
+         */
+        public Builder setRecentsManager(RecentsManager recentsManager) {
+            this.recentsManager = recentsManager;
+            return this;
+        }
+
+        public SearchManager build() {
+            return new SearchManager(this);
+        }
+
+        private static Provider[] getDefaultProviders() {
+            List<Provider> providers = new ArrayList<>();
+            providers.add(new GridReferenceProvider());
+            providers.add(new LatLonProvider());
+            return providers.toArray(new Provider[providers.size()]);
+        }
+    }
+
     private final RecentsManager mRecentsManager;
     private final List<Provider> mProviders = new ArrayList<>();
 
-    private static SearchManager sSearchManager = null;
-
-
-    public static SearchManager getInstance() {
-        if (sSearchManager == null) {
-            sSearchManager = new SearchManager(null, new GridReferenceProvider(),
-                    new LatLonProvider());
-        }
-        return sSearchManager;
+    public SearchManager() {
+        this(new Builder());
     }
 
-    public static SearchManager getInstance(RecentsManager recentsManager, List<Provider> providers) {
-        if (sSearchManager == null) {
-            sSearchManager = new SearchManager(providers, recentsManager);
-        }
-        return sSearchManager;
-    }
-
-    public SearchManager(RecentsManager recentsManager, Provider... providers) {
-        mRecentsManager = recentsManager;
-        mProviders.addAll(Arrays.asList(providers));
-    }
-
-    public SearchManager(List<Provider> providers, RecentsManager recentsManager) {
-        mRecentsManager = recentsManager;
-        mProviders.addAll(providers);
+    private SearchManager(Builder builder) {
+        mRecentsManager = builder.recentsManager;
+        mProviders.addAll(builder.providers);
     }
 
     public final Observable<SearchBundle> query(final String searchTerm) {
@@ -114,7 +147,7 @@ public class SearchManager {
                 @Override
                 public Observable<ProviderResponse> call(List<ProviderResponse> providerResponses) {
                     // check search resultset for even more recents (not found by recents matcher)
-                    List<String> idsToCheck = new ArrayList<String>();
+                    List<String> idsToCheck = new ArrayList<>();
                     for (ProviderResponse providerResponse : providerResponses) {
                         List<SearchResult> searchResults = providerResponse.getSearchResults();
                         for (SearchResult result : searchResults) {
@@ -159,15 +192,29 @@ public class SearchManager {
                     }
                     return new SearchBundle(recentsResponse, providerResponses);
                 }
-            }).zipWith(mRecentsManager.query(searchTerm), new Func2<SearchBundle, List<SearchResult>, SearchBundle>() {
+            }).zipWith(mRecentsManager.query(searchTerm).map(new Func1<List<SearchResult>, ProviderResponse>() {
                 @Override
-                public SearchBundle call(SearchBundle searchBundle, List<SearchResult> localMatches) {
-                    // TODO: handle recent scoring here for that perfect ordering ;)
-                    List<SearchResult> recentsPass2 = concateExcludeDuplicates(localMatches,
-                            searchBundle.getRecents());
-                    final String sourceRecents = RecentsManager.class.getSimpleName();
-                    return new SearchBundle(new ProviderResponse(sourceRecents, recentsPass2),
-                            searchBundle.getRemainingResponses());
+                public ProviderResponse call(List<SearchResult> searchResults) {
+                    return new ProviderResponse(RecentsManager.class.getSimpleName(), searchResults);
+                }
+            }).onErrorReturn(new Func1<Throwable, ProviderResponse>() {
+                        @Override
+                        public ProviderResponse call(Throwable throwable) {
+                            return new ProviderResponse(RecentsManager.class.getSimpleName(), throwable);
+                        }
+                    }), new Func2<SearchBundle, ProviderResponse, SearchBundle>() {
+                @Override
+                public SearchBundle call(SearchBundle searchBundle, ProviderResponse localMatches) {
+                    if (localMatches.hasError()) {
+                        return new SearchBundle(localMatches, searchBundle.getRemainingResponses());
+                    } else {
+                        // TODO: handle recent scoring here for that perfect ordering ;)
+                        List<SearchResult> recentsPass2 = concateExcludeDuplicates(localMatches.getSearchResults(),
+                                searchBundle.getRecents());
+                        final String sourceRecents = RecentsManager.class.getSimpleName();
+                        return new SearchBundle(new ProviderResponse(sourceRecents, recentsPass2),
+                                searchBundle.getRemainingResponses());
+                    }
                 }
             });
         }

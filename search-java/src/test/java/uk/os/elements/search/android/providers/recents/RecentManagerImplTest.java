@@ -24,7 +24,6 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import rx.observers.TestSubscriber;
 import uk.os.elements.search.SearchResult;
@@ -34,7 +33,7 @@ import static org.junit.Assert.assertEquals;
 public class RecentManagerImplTest {
 
     @Test
-    public void testSavingResultAndQueryWorks() throws Exception {
+    public void shouldSaveResultAndAllowQueryWithoutSubscription() throws Exception {
         TestSubscriber<Void> testSubscriber = new TestSubscriber<>();
 
         RecentsManager recentsManager = getRecentsManager();
@@ -66,7 +65,7 @@ public class RecentManagerImplTest {
     }
 
     @Test
-    public void testReturnedObservableProvidesResult() throws Exception {
+    public void shouldSaveResultAndAllowQueryWhenSubscribed() throws Exception {
         TestSubscriber<Void> saveSubscriber = new TestSubscriber<>();
         RecentsManager recentsManager = getRecentsManager();
         recentsManager.saveRecent(createSearchResult("Test1", 10000)).subscribe(saveSubscriber);
@@ -90,13 +89,11 @@ public class RecentManagerImplTest {
     }
 
     @Test
-    public void testReturnedObservableProvidesSeveralResults() throws Exception {
-        final AtomicReference<Throwable> error = new AtomicReference<>();
+    public void shouldReturnSingleResponseWithFourSearchResults() throws Exception {
+        RecentsManager recentsManager = getRecentsManagerWithResults();
 
         TestSubscriber<List<SearchResult>> testSubscriber = new TestSubscriber<>();
-        RecentsManager recentsManager = getRecentsManagerWithResults();
         recentsManager.last(10).subscribe(testSubscriber);
-
         testSubscriber.awaitTerminalEvent();
 
         testSubscriber.assertNoErrors();
@@ -111,15 +108,21 @@ public class RecentManagerImplTest {
         int expectedSize = 4;
         assertEquals(expectedSize, result.size());
 
-        SearchResult first = result.get(0);
-        String expectedName = "Darkwood";
-        String actualName = first.getName();
-        assertEquals(expectedName, actualName);
+        // verify order of recents
+        assertEquals("Darkwood", result.get(0).getName());
+        assertEquals("Cobwood", result.get(1).getName());
+        assertEquals("Blackwood", result.get(2).getName());
+        assertEquals("Applewood", result.get(3).getName());
+    }
 
-        SearchResult last = result.get(result.size() - 1);
-        expectedName = "Applewood";
-        actualName = last.getName();
-        assertEquals(expectedName, actualName);
+    private SearchResult createSearchResult(String name, double position) {
+        Envelope envelope = new Envelope(position - 500, position - 500, position + 500, position + 500);
+        return new SearchResult(name.toLowerCase().substring(0, 1),
+                name,
+                String.format("%s Town", name),
+                new Point(position, position),
+                envelope,
+                SpatialReference.create(27700));
     }
 
     private RecentsManager getRecentsManager() {
@@ -135,16 +138,6 @@ public class RecentManagerImplTest {
         save(createSearchResult("Darkwood", 40000), recentsManager);
 
         return recentsManager;
-    }
-
-    private SearchResult createSearchResult(String name, double position) {
-        Envelope envelope = new Envelope(position - 500, position - 500, position + 500, position + 500);
-        return new SearchResult(name.toLowerCase().substring(0, 1),
-                name,
-                String.format("%s Town", name),
-                new Point(position, position),
-                envelope,
-                SpatialReference.create(27700));
     }
 
     private void save(SearchResult searchResult, RecentsManager recentsManager) throws InterruptedException {
