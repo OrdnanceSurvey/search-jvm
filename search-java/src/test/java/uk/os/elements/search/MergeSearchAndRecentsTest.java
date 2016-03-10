@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -225,7 +226,19 @@ public class MergeSearchAndRecentsTest {
         testSubscriber.awaitTerminalEvent();
         testSubscriber.assertNoErrors();
         testSubscriber.assertCompleted();
+        if (!testSubscriber.isUnsubscribed()) {
+            // try and give it time to sync
+            sleep(1000);
+        }
         testSubscriber.assertUnsubscribed();
+    }
+
+    private void sleep(long time) {
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private static class MockSupport {
