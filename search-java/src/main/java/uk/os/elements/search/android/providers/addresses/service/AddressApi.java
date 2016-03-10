@@ -37,7 +37,7 @@ public interface AddressApi {
 
     /**
      * Query the find API
-     * @see <a href="https://apidocs.os.uk/docs/os-places-find">https://apidocs.os.uk/docs/os-places-find</a>
+     * <a href="https://apidocs.os.uk/docs/os-places-find">https://apidocs.os.uk/docs/os-places-find</a>
      *
      * {@code https://api.ordnancesurvey.co.uk/places/v1/addresses/find?query={value}&output_srs=EPSG:4326&key={apiKey}}
      *
@@ -56,7 +56,7 @@ public interface AddressApi {
 
     /**
      * Query the postcode API
-     * @see <a href="https://apidocs.os.uk/docs/os-places-postcode">https://apidocs.os.uk/docs/os-places-postcode</a>
+     * <a href="https://apidocs.os.uk/docs/os-places-postcode">https://apidocs.os.uk/docs/os-places-postcode</a>
      *
      * {@code https://api.ordnancesurvey.co.uk/places/v1/addresses/postcode?postcode={value}&output_srs=EPSG:4326&dataset=dpa&key={apiKey}}
      *
@@ -75,7 +75,7 @@ public interface AddressApi {
 
     /**
      * Query the bounding box API
-     * @see <a href="https://apidocs.os.uk/docs/os-places-bbox">https://apidocs.os.uk/docs/os-places-bbox</a>
+     * <a href="https://apidocs.os.uk/docs/os-places-bbox">https://apidocs.os.uk/docs/os-places-bbox</a>
      *
      * {@code https://api.ordnancesurvey.co.uk/places/v1/addresses/bbox?bbox={bbox}&srs=EPSG:4326&dataset=dpa&key={apiKey}}
      *
@@ -96,7 +96,7 @@ public interface AddressApi {
 
     /**
      * Query the Unique Property Reference Number (UPRN) API
-     * @see <a href="https://apidocs.os.uk/docs/os-places-uprn">https://apidocs.os.uk/docs/os-places-uprn</a>
+     * <a href="https://apidocs.os.uk/docs/os-places-uprn">https://apidocs.os.uk/docs/os-places-uprn</a>
      *
      * {@code https://api.ordnancesurvey.co.uk/places/v1/addresses/uprn?uprn={value}&dataset=dpa&output_srs=EPSG:4326&key={value}}
      *
@@ -113,7 +113,7 @@ public interface AddressApi {
 
     /**
      * Query the radius API
-     * @see <a href="https://apidocs.os.uk/docs/os-places-radius">https://apidocs.os.uk/docs/os-places-radius</a>
+     * <a href="https://apidocs.os.uk/docs/os-places-radius">https://apidocs.os.uk/docs/os-places-radius</a>
      *
      * {@code https://api.ordnancesurvey.co.uk/places/v1/addresses/radius?point={point}&srs=EPSG:4326&radius=190&dataset=dpa&key={apiKey}}
      *
@@ -135,7 +135,7 @@ public interface AddressApi {
     /**
      * Query the nearest address API
      * Provides the nearest address to a given coordinate
-     * @see <a href="https://apidocs.os.uk/docs/os-places-nearest">https://apidocs.os.uk/docs/os-places-nearest</a>
+     * <a href="https://apidocs.os.uk/docs/os-places-nearest">https://apidocs.os.uk/docs/os-places-nearest</a>
      *
      * {@code https://api.ordnancesurvey.co.uk/places/v1/addresses/nearest?point={point}&srs=EPSG:4326&key={apiKey}}
      *
