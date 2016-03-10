@@ -38,6 +38,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static uk.os.elements.search.android.providers.Util.getEnvironmentalVariable;
 
+/**
+ * Verifies that OpenNames responses are provided.
+ * > provides product feedback with regard to input, context and results in respect to relevance.
+ */
 public class IntegrationOpennamesProviderTestLive {
 
     private static final String ENV_KEY_DEFAULT = "undefined";
@@ -191,7 +195,7 @@ public class IntegrationOpennamesProviderTestLive {
         boolean hasError = error.get() != null;
         if (hasError) {
             sLogger.log(Level.SEVERE, "Failure", error.get());
-            throw new Exception("borked", error.get());
+            throw new Exception("problem executing query", error.get());
         }
         boolean tooSlowOrBorked = result.get() == null;
         if (tooSlowOrBorked) {
@@ -237,7 +241,7 @@ public class IntegrationOpennamesProviderTestLive {
     }
 
     private OpennamesProvider getSearchManager() {
-        return new OpennamesProvider(API_KEY, getSearchApi());
+        return new OpennamesProvider.Builder(API_KEY).setSearchApi(getSearchApi()).build();
     }
 
     public static class QueryTest {

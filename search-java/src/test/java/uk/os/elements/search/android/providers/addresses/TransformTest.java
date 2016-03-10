@@ -39,8 +39,28 @@ import static org.mockito.Mockito.when;
 
 public class TransformTest {
 
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowIllegalArgumentExceptionWhenEmptyGazetteerData() {
+        ServerResponse serverResponse = new ServerResponse() {
+            @Override
+            public Header getHeader() {
+                return new Header();
+            }
+
+            @Override
+            public List<Result> getResults() {
+                Result r = null;
+                return Arrays.asList(r);
+            }
+        };
+        Observable<ServerResponse> response = Observable.just(serverResponse);
+        List<Observable<ServerResponse>> list = new ArrayList<>();
+        list.add(response);
+        Transform.toSearchResults(list).toBlocking().first();
+    }
+
     @Test
-    public void testTransformationFromServerResponseToSearchResults() {
+    public void shouldTransformServerResponseToSearchResults() {
         Observable<ServerResponse> response = Observable.just(Util.getServerResponse());
         List<Observable<ServerResponse>> list = new ArrayList<>();
         list.add(response);
@@ -80,7 +100,7 @@ public class TransformTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void invalidSrid() {
+    public void shouldThrowExceptionForInvalidSrid() {
         ServerResponse sr = new ServerResponse() {
             @Override
             public Header getHeader() {
@@ -99,7 +119,7 @@ public class TransformTest {
     }
 
     @Test
-    public void weirdFeatureValues() {
+    public void shouldUseEllipsisWhenNonMatchingFeatureNameAndLongerThan10() {
         ServerResponse sr = Mockito.mock(ServerResponse.class);
         final Result r = Mockito.mock(Result.class);
         final Result.Dpa d = Mockito.mock(Result.Dpa.class);

@@ -26,7 +26,6 @@ import uk.os.elements.search.android.providers.opennames.service.model.ServerRes
 
 import static org.mockito.Mockito.*;
 
-// TODO
 public class OpennamesProviderTest {
 
     private final static String API_KEY = "niceTry";
@@ -34,7 +33,7 @@ public class OpennamesProviderTest {
     private final static String EMPTY = "";
 
     @Test
-    public void query() {
+    public void shouldQueryBackendEvenIfEmpty() {
         SearchApi searchApi = Mockito.mock(SearchApi.class);
         when(searchApi.search(anyString(), anyString())).then(new Answer<Observable<ServerResponse>>() {
             @Override
@@ -43,13 +42,11 @@ public class OpennamesProviderTest {
             }
         });
 
-        OpennamesProvider opennamesProvider = new OpennamesProvider(API_KEY, searchApi);
+        OpennamesProvider opennamesProvider = new OpennamesProvider.Builder(API_KEY).setSearchApi(searchApi).build();
         opennamesProvider.query(LONDON).toBlocking().first();
         verify(searchApi, times(1)).search(API_KEY, LONDON);
 
         opennamesProvider.query(EMPTY).toBlocking().first();
         verify(searchApi, times(1)).search(API_KEY, EMPTY);
     }
-
 }
-

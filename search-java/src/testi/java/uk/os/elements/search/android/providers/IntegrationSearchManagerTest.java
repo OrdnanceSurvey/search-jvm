@@ -41,7 +41,7 @@ public class IntegrationSearchManagerTest {
         SearchManager searchManager = new SearchManager.Builder()
                 .setRecentsManager(new RecentsManagerImpl())
                 .setProviders(new GridReferenceProvider(),
-                              new OpennamesProvider(API_KEY, getSearchApi()),
+                              new OpennamesProvider.Builder(API_KEY).setSearchApi(getSearchApi()).build(),
                               new LatLonProvider())
                 .build();
         SearchBundle searchBundle = searchManager.query("51.50722, -0.1275").toBlocking().single();
@@ -55,7 +55,7 @@ public class IntegrationSearchManagerTest {
         SearchManager searchManager = new SearchManager.Builder()
                 .setRecentsManager(new RecentsManagerImpl())
                 .setProviders(new GridReferenceProvider(),
-                              new OpennamesProvider(API_KEY, getSearchApi()),
+                              new OpennamesProvider.Builder(API_KEY).setSearchApi(getSearchApi()).build(),
                               new LatLonProvider())
                 .build();
         SearchBundle searchBundle = searchManager.query("SU4315").toBlocking().single();
@@ -69,7 +69,7 @@ public class IntegrationSearchManagerTest {
         SearchManager searchManager = new SearchManager.Builder()
                 .setRecentsManager(new RecentsManagerImpl())
                 .setProviders(new GridReferenceProvider(),
-                              new OpennamesProvider(API_KEY, getSearchApi()),
+                              new OpennamesProvider.Builder(API_KEY).setSearchApi(getSearchApi()).build(),
                               new LatLonProvider())
                 .build();
         SearchBundle searchBundle = searchManager.query("SH609543").toBlocking().single();

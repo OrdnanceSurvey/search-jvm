@@ -22,8 +22,21 @@ final class GeoPattern {
 
     private GeoPattern() { }
 
+    /**
+     * A Unique Property Reference Number (UPRN) is the persistent unique identifier that underpins the AddressBase
+     * products range.
+     *
+     * UPRNs are integers (numbers) that can be up to 12 digits in length; they can therefore be less than 12 digits
+     * long and do not require leading zeros. However some gazetteer database applications will pad UPRNs that are less
+     * than 12 digits with zeros.
+     *
+     * @see <a href="https://www.ordnancesurvey.co.uk/business-and-government/help-and-support/products/addressbase-technical-faqs.html">https://www.ordnancesurvey.co.uk/business-and-government/help-and-support/products/addressbase-technical-faqs.html</a>
+     */
     private static final Pattern UPRN_PATTERN = Pattern.compile("(^\\d{1,12}$)");
-    // TODO check with server team what they are using
+
+    /**
+     * TODO: WARNING - THIS REGEX IS UNAUTHORISED.  MEETING SCHEDULED FOR 2016-02-11
+     */
     private static final Pattern POSTCODE_PARTIAL_PATTERN =
             Pattern.compile("^[A-Za-z][A-Za-z]?\\d\\d?[ ]?\\d?[A-Za-z]?[A-Za-z]?$");
 

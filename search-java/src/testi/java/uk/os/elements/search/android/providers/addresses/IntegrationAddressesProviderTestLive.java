@@ -35,7 +35,7 @@ public class IntegrationAddressesProviderTestLive {
 
     @Test
     public void queryDowningStreet() {
-        AddressesProvider provider = new AddressesProvider.Builder(API_KEY, provideSearchApi()).build();
+        AddressesProvider provider = new AddressesProvider.Builder(API_KEY).setAddressApi(provideSearchApi()).build();
         List<SearchResult> result = provider.query("10 Downing Street, London").toBlocking().first();
         assertTrue(result.size() > 0);
     }

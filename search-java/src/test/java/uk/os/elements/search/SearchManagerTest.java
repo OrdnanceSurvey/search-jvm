@@ -43,14 +43,15 @@ import static org.mockito.Mockito.when;
 public class SearchManagerTest {
 
     @Test
-    public void testDefaultSearchManager() {
+    public void shouldHaveLatLonAndGridReferenceDefaultProviders() {
         SearchManager searchManager = new SearchManager();
         assertNotNull(searchManager);
         assertNotNull(searchManager.query("51, 0").toBlocking().first());
+        assertNotNull(searchManager.query("SU 37290 15512").toBlocking().first());
     }
 
     @Test
-    public void testPremiumProvidersBuild() {
+    public void shouldBuildWhenApiKeysAdded() {
         SearchManager searchManager = new SearchManager.Builder()
                 .addOpenNames("openNamesApiKey")
                 .addPlaces("placesApiKey")
@@ -59,7 +60,7 @@ public class SearchManagerTest {
     }
 
     @Test
-    public void testRecentsProviderWithError() {
+    public void shouldCreateSearchBundleWithErrorWhenRecentsManagerThrowsError() {
         final IllegalStateException error = new IllegalStateException("bad times for recents provider");
         Answer<Observable<List<SearchResult>>> errorAnswer = new Answer<Observable<List<SearchResult>>>() {
             @Override
@@ -91,7 +92,7 @@ public class SearchManagerTest {
     }
 
     @Test
-    public void testProviderWithError() {
+    public void shouldCreateSearchBundleWithErrorWhenProviderThrowsError() {
         final IllegalStateException error = new IllegalStateException("bad times for some reason");
 
         RecentsManager recentsManager = Mockito.mock(RecentsManager.class);
@@ -123,7 +124,7 @@ public class SearchManagerTest {
     }
 
     @Test
-    public void testRecentManagerWithMultipleItemsFiltersDuplicatesAndKeepsOthers() {
+    public void shouldFilterSearchResultsForRecents() {
         // We assume that the lat/lon entry obtained the coordinate and, apparently, London because it was a close match
         RecentsManager recentsManager = Mockito.mock(RecentsManager.class);
         when(recentsManager.query(Query.input)).then(Query.Database.HasData.response);
@@ -163,7 +164,26 @@ public class SearchManagerTest {
     }
 
     @Test
-    public void testListProviderRecentManager() {
+    public void shouldFilterSearchResultsForRecentsWhenSingleProvider() {
+        RecentsManager recentsManager = Mockito.mock(RecentsManager.class);
+        when(recentsManager.query(anyString())).then(Query.Database.HasData.response);
+        when(recentsManager.queryById(anyString())).then(Query.Database.HasData.response);
+
+        LatLonProvider latLonProvider = Mockito.mock(LatLonProvider.class);
+        when(latLonProvider.query(Query.input)).then(Query.Database.HasData.response);
+
+        SearchManager searchManager = new SearchManager.Builder()
+                .setRecentsManager(recentsManager)
+                .setProviders(latLonProvider)
+                .build();
+        SearchBundle searchBundle = searchManager.query(Query.input).toBlocking().single();
+
+        assertTrue(searchBundle.getRecents().size() == 1);
+        assertTrue(searchBundle.getRemaining().size() == 0);
+    }
+
+    @Test
+    public void shouldFilterSearchResultsForRecentsWhenSingleProviderViaList() {
         RecentsManager recentsManager = Mockito.mock(RecentsManager.class);
         when(recentsManager.query(anyString())).then(Query.Database.HasData.response);
         when(recentsManager.queryById(anyString())).then(Query.Database.HasData.response);
@@ -184,7 +204,7 @@ public class SearchManagerTest {
     }
 
     @Test
-    public void testNoRecentManager() {
+    public void shouldQueryProvidersWhenNoRecentManager() {
         LatLonProvider latLonProvider = Mockito.mock(LatLonProvider.class);
         when(latLonProvider.query(Query.input)).then(Query.Database.HasData.response);
 
@@ -196,7 +216,7 @@ public class SearchManagerTest {
     }
 
     @Test
-    public void latitudeLongitude() throws Exception {
+    public void shouldProvideLatitudeLongitudeSearchResultForLatLonInputWhenMultipleProviders() throws Exception {
         RecentsManager recentsManager = Mockito.mock(RecentsManager.class);
         when(recentsManager.query(anyString())).then(Query.Database.NoData.response);
         when(recentsManager.queryById(anyString())).then(Query.Database.NoData.response);
@@ -218,25 +238,6 @@ public class SearchManagerTest {
         String expected = Query.Database.HasData.name;
         String actual = searchBundle.getRemaining().get(0).getName();
         assertEquals(expected, actual);
-    }
-
-    @Test
-    public void testRecents() {
-        RecentsManager recentsManager = Mockito.mock(RecentsManager.class);
-        when(recentsManager.query(anyString())).then(Query.Database.HasData.response);
-        when(recentsManager.queryById(anyString())).then(Query.Database.HasData.response);
-
-        LatLonProvider latLonProvider = Mockito.mock(LatLonProvider.class);
-        when(latLonProvider.query(Query.input)).then(Query.Database.HasData.response);
-
-        SearchManager searchManager = new SearchManager.Builder()
-                .setRecentsManager(recentsManager)
-                .setProviders(latLonProvider)
-                .build();
-        SearchBundle searchBundle = searchManager.query(Query.input).toBlocking().single();
-
-        assertTrue(searchBundle.getRecents().size() == 1);
-        assertTrue(searchBundle.getRemaining().size() == 0);
     }
 
     private static class Query {

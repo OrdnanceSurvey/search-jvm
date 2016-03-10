@@ -16,6 +16,9 @@
 
 package uk.os.elements.search.android.providers.addresses;
 
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.functions.Func1;
 import uk.os.elements.search.SearchResult;
@@ -31,20 +34,24 @@ import java.util.Set;
 
 public class AddressesProvider implements Provider {
 
+    private static final int PARAM_MAX_RESULTS = 25;
+    private static final int PARAM_RADIUS_METRES = 200;
+    private static final String PARAM_SRS = "EPSG:4326";
+    private static final String PARAM_OUTPUT_SRS = PARAM_SRS;
+
     public static class Builder {
 
         private String mKey;
-        private AddressApi mAddressApi;
         private boolean mQueryBoundingBox = false;
         private boolean mQueryFind = true;
         private boolean mQueryPostcode = true;
         private boolean mQueryRadius = false;
         private boolean mQueryNearest = false;
         private boolean mQueryUprn = true;
+        private AddressApi mAddressApi;
 
-        public Builder(String sKeyOpenNames, AddressApi addressApi) {
+        public Builder(String sKeyOpenNames) {
             mKey = sKeyOpenNames;
-            mAddressApi = addressApi;
         }
 
         public Builder queryPostcode(boolean value) {
@@ -77,8 +84,18 @@ public class AddressesProvider implements Provider {
             return this;
         }
 
+        /**
+         * @param addressApi the alternative Address API to use instead of the default.
+         * @return this builder
+         */
+        public Builder setAddressApi(AddressApi addressApi) {
+            mAddressApi = addressApi;
+            return this;
+        }
+
         public AddressesProvider build() {
-            return new AddressesProvider(mKey, mAddressApi, mQueryBoundingBox, mQueryFind, mQueryNearest,
+            AddressApi addressApi = mAddressApi == null ? provideAddressSearchApi() : mAddressApi;
+            return new AddressesProvider(mKey, addressApi, mQueryBoundingBox, mQueryFind, mQueryNearest,
                     mQueryPostcode, mQueryRadius, mQueryUprn);
         }
     }
@@ -121,13 +138,13 @@ public class AddressesProvider implements Provider {
         List<Observable<ServerResponse>> list = new ArrayList<>();
 
         if (mQueryFind) {
-            list.add(mAddressApi.find(mKey, searchTerm));
+            list.add(mAddressApi.find(mKey, searchTerm, PARAM_MAX_RESULTS, PARAM_OUTPUT_SRS));
         }
         if (mQueryPostcode && GeoPattern.isPostcodeCandidate(searchTerm)) {
-            list.add(mAddressApi.postcode(mKey, searchTerm));
+            list.add(mAddressApi.postcode(mKey, searchTerm, PARAM_MAX_RESULTS, PARAM_OUTPUT_SRS));
         }
         if (mQueryUprn && GeoPattern.isUprnCandidate(searchTerm)) {
-            list.add(mAddressApi.uprn(mKey, searchTerm));
+            list.add(mAddressApi.uprn(mKey, searchTerm, PARAM_OUTPUT_SRS));
         }
         return list;
     }
@@ -136,15 +153,17 @@ public class AddressesProvider implements Provider {
         List<Observable<ServerResponse>> list = new ArrayList<>();
 
         if (mQueryNearest) {
-            list.add(mAddressApi.nearest(mKey, ParamFormatting.point(lat, lon)));
+            list.add(mAddressApi.nearest(mKey, ParamFormatting.point(lat, lon), PARAM_SRS, PARAM_OUTPUT_SRS));
         }
 
         if (mQueryBoundingBox) {
-            list.add(mAddressApi.bbox(mKey, ParamFormatting.bbox(lat - 0.001, lon - 0.001, lat + 0.001, lon + 0.001)));
+            list.add(mAddressApi.bbox(mKey, ParamFormatting.bbox(lat - 0.001, lon - 0.001, lat + 0.001, lon + 0.001),
+                    PARAM_SRS, PARAM_OUTPUT_SRS));
         }
 
         if (mQueryRadius) {
-            list.add(mAddressApi.radius(mKey, ParamFormatting.point(lat, lon)));
+            list.add(mAddressApi.radius(mKey, ParamFormatting.point(lat, lon), PARAM_SRS, PARAM_RADIUS_METRES,
+                    PARAM_OUTPUT_SRS));
         }
 
         return list;
@@ -167,5 +186,14 @@ public class AddressesProvider implements Provider {
                 return betterResult;
             }
         };
+    }
+
+    private static AddressApi provideAddressSearchApi() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.ordnancesurvey.co.uk/places/v1/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .build();
+        return retrofit.create(AddressApi.class);
     }
 }

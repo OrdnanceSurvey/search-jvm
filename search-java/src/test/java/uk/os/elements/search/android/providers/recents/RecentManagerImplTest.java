@@ -33,7 +33,7 @@ import static org.junit.Assert.assertEquals;
 public class RecentManagerImplTest {
 
     @Test
-    public void testSavingResultAndQueryWorks() throws Exception {
+    public void shouldSaveResultAndAllowQueryWithoutSubscription() throws Exception {
         TestSubscriber<Void> testSubscriber = new TestSubscriber<>();
 
         RecentsManager recentsManager = getRecentsManager();
@@ -65,7 +65,7 @@ public class RecentManagerImplTest {
     }
 
     @Test
-    public void testReturnedObservableProvidesResult() throws Exception {
+    public void shouldSaveResultAndAllowQueryWhenSubscribed() throws Exception {
         TestSubscriber<Void> saveSubscriber = new TestSubscriber<>();
         RecentsManager recentsManager = getRecentsManager();
         recentsManager.saveRecent(createSearchResult("Test1", 10000)).subscribe(saveSubscriber);
@@ -89,7 +89,7 @@ public class RecentManagerImplTest {
     }
 
     @Test
-    public void testReturnedObservableProvidesSeveralResults() throws Exception {
+    public void shouldReturnSingleResponseWithFourSearchResults() throws Exception {
         RecentsManager recentsManager = getRecentsManagerWithResults();
 
         TestSubscriber<List<SearchResult>> testSubscriber = new TestSubscriber<>();

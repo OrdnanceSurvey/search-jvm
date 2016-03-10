@@ -60,6 +60,9 @@ final class Transform {
     }
 
     private static SearchResult from(final SpatialReference spatialReference, final Result result) {
+        if (result.getGazetteerEntry() == null) {
+            throw new IllegalArgumentException("no gazetteer data");
+        }
         final String addressLine = result.getGazetteerEntry().getADDRESS();
 
         String name;

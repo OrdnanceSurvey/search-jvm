@@ -48,13 +48,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class MergeSearchAndRecentsTest {
 
     @Test
-    public void testSingleRecent() throws Exception {
+    public void shouldReturnSingleRecentWhenAdded() throws Exception {
         String query = "High Street";
 
         RecentsManager recentsManager = new RecentsManagerImpl();
@@ -76,8 +75,8 @@ public class MergeSearchAndRecentsTest {
     }
 
     @Test
-    public void testBackendDown() {
-        String query = "High Street";
+    public void shouldReturnRecentsWhenProviderErrors() {
+        String query = "51 0";
 
         RecentsManager recentsManager = new RecentsManagerImpl();
         SearchManager searchManager = getBrokenSearchManagerImpl(recentsManager);
@@ -87,10 +86,17 @@ public class MergeSearchAndRecentsTest {
         int actual = searchBundle.getRecents().size();
         int expected = 0;
         assertEquals(expected, actual);
+
+        SearchResult sr = searchBundle.getRemaining().get(0);
+        recentsManager.saveRecent(sr);
+        searchBundle = query(searchManager, query);
+        actual = searchBundle.getRecents().size();
+        expected = 1;
+        assertEquals(expected, actual);
     }
 
     @Test
-    public void testBackendUpThenDown() throws Exception {
+    public void shouldReturnResultsWhenProviderIsOkAndThenFails() throws Exception {
         String query = "High Street";
 
         RecentsManager recentsManager = new RecentsManagerImpl();
@@ -117,7 +123,7 @@ public class MergeSearchAndRecentsTest {
     }
 
     @Test
-    public void testDuplicatesAreRemovedBasedOnId() throws Exception {
+    public void shouldRemoveDuplicatesBasedOnId() throws Exception {
         String query = "applewood";
 
         String duplicateFeatureName = "Applewood - the duplicate";
@@ -182,7 +188,7 @@ public class MergeSearchAndRecentsTest {
                 .setRecentsManager(recentsManager)
                 .setProviders(
                         new GridReferenceProvider(),
-                        new OpennamesProvider("working", getSearchApi()),
+                        new OpennamesProvider.Builder("working").setSearchApi(getSearchApi()).build(),
                         new LatLonProvider())
                 .build();
     }
@@ -191,7 +197,7 @@ public class MergeSearchAndRecentsTest {
         return new SearchManager.Builder().setRecentsManager(recentsManager)
                 .setProviders(
                         new GridReferenceProvider(),
-                        new OpennamesProvider("broken", getSearchApiBroken()),
+                        new OpennamesProvider.Builder("broken").setSearchApi(getSearchApiBroken()).build(),
                         new LatLonProvider())
                 .build();
     }

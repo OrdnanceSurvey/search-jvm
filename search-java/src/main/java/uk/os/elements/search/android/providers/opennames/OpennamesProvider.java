@@ -25,6 +25,9 @@ import java.util.Map;
 
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.SpatialReference;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.functions.Func1;
 import uk.os.elements.search.SearchResult;
@@ -35,10 +38,29 @@ import uk.os.elements.search.android.providers.opennames.service.model.ServerRes
 
 public class OpennamesProvider implements Provider {
 
-    private final SearchApi mSearchApi;
-    private final String mKey;
+    public static class Builder {
 
-    public OpennamesProvider(String key, SearchApi searchApi) {
+        private String mKey;
+        private SearchApi mSearchApi;
+
+        public Builder(String key) {
+            mKey = key;
+        }
+
+        public Builder setSearchApi(SearchApi searchApi) {
+            mSearchApi = searchApi;
+            return this;
+        }
+
+        public OpennamesProvider build() {
+            return new OpennamesProvider(mKey, mSearchApi == null ? provideSearchApi() : mSearchApi);
+        }
+    }
+
+    private final String mKey;
+    private final SearchApi mSearchApi;
+
+    private OpennamesProvider(String key, SearchApi searchApi) {
         mKey = key;
         mSearchApi = searchApi;
     }
@@ -154,5 +176,14 @@ public class OpennamesProvider implements Provider {
             }
         }
         return betterList;
+    }
+
+    private static SearchApi provideSearchApi() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.ordnancesurvey.co.uk/opennames/v1/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .build();
+        return retrofit.create(SearchApi.class);
     }
 }

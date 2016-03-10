@@ -33,7 +33,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static uk.os.elements.search.android.providers.Util.getStringResource;
 
 public class IntegrationOpennamesProviderTest {
@@ -45,14 +44,16 @@ public class IntegrationOpennamesProviderTest {
         final String cannedResponse = getStringResource("opennames_canned.json");
 
         MockWebServer server = new MockWebServer();
-        // Schedule some responses.
+        // Schedule response.
         server.enqueue(new MockResponse().setBody(cannedResponse).setResponseCode(200));
         server.start();
 
-        // Ask the server for its URL. You'll need this to make HTTP requests.
+        // Ask the server for its URL
         HttpUrl baseUrl = server.url("/opennames/v1/");
 
-        final OpennamesProvider opennamesProvider = new OpennamesProvider(API_KEY, getSearchApi(baseUrl.toString()));
+        final OpennamesProvider opennamesProvider = new OpennamesProvider.Builder(API_KEY)
+                .setSearchApi(getSearchApi(baseUrl.toString()))
+                .build();
 
         final List<SearchResult> results = new ArrayList<>();
         final CountDownLatch latch = new CountDownLatch(1);

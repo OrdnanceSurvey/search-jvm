@@ -42,7 +42,7 @@ public class IntegrationAddressesProviderTest {
     private static String API_KEY = "nice_try!";
 
     @Test
-    public void queryBoundingBox() throws IOException, InterruptedException {
+    public void shouldQueryBoundingBoxEndpointAndReceiveCannedData() throws IOException, InterruptedException {
         final String cannedResponse = Util.getStringResource("boundingbox_canned.json");
 
         // define a canned response
@@ -66,7 +66,8 @@ public class IntegrationAddressesProviderTest {
 
         // configure
         final AddressesProvider addressesProvider = new AddressesProvider
-                .Builder(API_KEY, getSearchApi(baseUrl.toString()))
+                .Builder(API_KEY)
+                .setAddressApi(getSearchApi(baseUrl.toString()))
                 .queryBoundingBox(true)
                 .queryFind(false)
                 .queryNearest(false)
@@ -90,10 +91,12 @@ public class IntegrationAddressesProviderTest {
         }).start();
 
         RecordedRequest request = server.takeRequest();
-        String actual = request.getPath();
-        String expected = "/places/v1/addresses/bbox?srs=EPSG:4326&dataset=dpa&key=" + API_KEY
-                + "&bbox=50.920709,-1.4029539999999998,50.922709,-1.400954";
-        assertEquals(expected, actual);
+        String path = request.getPath();
+        assertTrue(path.contains("/places/v1/addresses/bbox"));
+        assertTrue(path.contains("bbox=50.920709,-1.4029539999999998,50.922709,-1.400954"));
+        assertTrue(path.contains("srs=EPSG:4326"));
+        assertTrue(path.contains("dataset=dpa"));
+        assertTrue(path.contains("key=" + API_KEY));
 
         latch.await(5, TimeUnit.SECONDS);
 
@@ -107,24 +110,7 @@ public class IntegrationAddressesProviderTest {
     }
 
     private AddressApi getSearchApi(String url) {
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request request = chain.request();
-
-                long t1 = System.nanoTime();
-                System.out.println(String.format("Sending request %s on %s%n%s",
-                        request.url(), chain.connection(), request.headers()));
-
-                Response response = chain.proceed(request);
-
-                long t2 = System.nanoTime();
-                System.out.println((String.format("Received response for %s in %.1fms%n%s",
-                        response.request().url(), (t2 - t1) / 1e6d, response.headers())));
-
-                return response;
-            }
-        }).build();
+        OkHttpClient client = new OkHttpClient.Builder().build();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(url)

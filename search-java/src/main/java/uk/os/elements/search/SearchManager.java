@@ -23,9 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.functions.Func1;
 import rx.functions.Func2;
@@ -33,11 +30,9 @@ import rx.functions.FuncN;
 import uk.os.elements.search.android.providers.Provider;
 import uk.os.elements.search.android.providers.ProviderResponse;
 import uk.os.elements.search.android.providers.addresses.AddressesProvider;
-import uk.os.elements.search.android.providers.addresses.service.AddressApi;
 import uk.os.elements.search.android.providers.bng.GridReferenceProvider;
 import uk.os.elements.search.android.providers.latlon.LatLonProvider;
 import uk.os.elements.search.android.providers.opennames.OpennamesProvider;
-import uk.os.elements.search.android.providers.opennames.service.SearchApi;
 import uk.os.elements.search.android.providers.recents.RecentUtils;
 import uk.os.elements.search.android.providers.recents.RecentsManager;
 
@@ -63,12 +58,12 @@ public class SearchManager {
         }
 
         public Builder addOpenNames(String apiKey) {
-            this.providers.add(new OpennamesProvider(apiKey, provideSearchApi()));
+            this.providers.add(new OpennamesProvider.Builder(apiKey).build());
             return this;
         }
 
         public Builder addPlaces(String apiKey) {
-            this.providers.add(new AddressesProvider.Builder(apiKey, provideAddressSearchApi()).build());
+            this.providers.add(new AddressesProvider.Builder(apiKey).build());
             return this;
         }
 
@@ -242,24 +237,4 @@ public class SearchManager {
         }
         return dest;
     }
-
-    private static AddressApi provideAddressSearchApi() {
-        Retrofit retrofit = new Retrofit.Builder()
-                // TODO
-                .baseUrl("https://api.ordnancesurvey.co.uk/places/v1/addresses/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .build();
-        return retrofit.create(AddressApi.class);
-    }
-
-    private static SearchApi provideSearchApi() {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.ordnancesurvey.co.uk/opennames/v1/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .build();
-        return retrofit.create(SearchApi.class);
-    }
-
 }
