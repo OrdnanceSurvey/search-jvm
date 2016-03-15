@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import rx.Observable;
@@ -30,9 +31,13 @@ import rx.subjects.AsyncSubject;
 import uk.os.elements.search.SearchResult;
 import uk.os.elements.search.android.providers.Provider;
 
+/**
+ * In-memory RecentsManager
+ *
+ * Mostly useful for demos, testing etc. as a better recents might use a persistent storage
+ */
 public class RecentsManagerImpl implements Provider, RecentsManager {
 
-    // TODO: either use guava or rationalise what is happening
     private Map<String, SearchResult> mIndex = Collections.synchronizedMap(new HashMap<String, SearchResult>());
     private List<SearchResult> mSearchResults = Collections.synchronizedList(new ArrayList<SearchResult>());
 
@@ -191,6 +196,6 @@ public class RecentsManagerImpl implements Provider, RecentsManager {
     }
 
     private String sanitised(String string) {
-        return string.toLowerCase();
+        return string.toLowerCase(Locale.getDefault());
     }
 }

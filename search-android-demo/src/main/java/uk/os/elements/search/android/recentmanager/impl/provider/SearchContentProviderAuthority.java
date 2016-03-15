@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package uk.os.elements.search.android.providers.opennames.service;
+package uk.os.elements.search.android.recentmanager.impl.provider;
 
-import retrofit2.http.GET;
-import retrofit2.http.Query;
-import rx.Observable;
-import uk.os.elements.search.android.providers.opennames.service.model.ServerResponse;
+/**
+ * Source: http://stackoverflow.com/questions/10790919/android-having-provider-authority-in-the-app-project/10791144#10791144
+ */
+public class SearchContentProviderAuthority {
 
-public interface SearchApi {
-
-    @GET("find?maxresults=25")
-    Observable<ServerResponse> search(@Query("key") String apiKey, @Query("query") String value);
-
-    
+    public static final String CONTENT_AUTHORITY = "uk.os.elements.search.android.demo";
 }
+

@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package uk.os.elements.search.android.providers.opennames.service;
+package uk.os.elements.search.android;
 
-import retrofit2.http.GET;
-import retrofit2.http.Query;
-import rx.Observable;
-import uk.os.elements.search.android.providers.opennames.service.model.ServerResponse;
+import android.app.Application;
+import android.test.ApplicationTestCase;
 
-public interface SearchApi {
-
-    @GET("find?maxresults=25")
-    Observable<ServerResponse> search(@Query("key") String apiKey, @Query("query") String value);
-
-    
+/**
+ * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
+ */
+public class ApplicationTest extends ApplicationTestCase<Application> {
+    public ApplicationTest() {
+        super(Application.class);
+    }
 }

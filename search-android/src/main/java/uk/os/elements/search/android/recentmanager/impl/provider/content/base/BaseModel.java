@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-package uk.os.elements.search.android.providers.opennames.service;
+package uk.os.elements.search.android.recentmanager.impl.provider.content.base;
 
-import retrofit2.http.GET;
-import retrofit2.http.Query;
-import rx.Observable;
-import uk.os.elements.search.android.providers.opennames.service.model.ServerResponse;
-
-public interface SearchApi {
-
-    @GET("find?maxresults=25")
-    Observable<ServerResponse> search(@Query("key") String apiKey, @Query("query") String value);
-
-    
+public interface BaseModel {
 }

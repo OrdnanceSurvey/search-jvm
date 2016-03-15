@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package uk.os.elements.search.android.providers.opennames.service;
+package uk.os.elements.search.android.util;
 
-import retrofit2.http.GET;
-import retrofit2.http.Query;
-import rx.Observable;
-import uk.os.elements.search.android.providers.opennames.service.model.ServerResponse;
+import rx.Subscription;
 
-public interface SearchApi {
+public final class RxUtil {
 
-    @GET("find?maxresults=25")
-    Observable<ServerResponse> search(@Query("key") String apiKey, @Query("query") String value);
+    private RxUtil() { }
 
-    
+    public static void unsubscribe(final Subscription subscription) {
+        if (subscription != null && !subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+        }
+    }
 }

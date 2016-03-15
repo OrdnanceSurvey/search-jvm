@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package uk.os.elements.search.android.providers.opennames.service;
+package uk.os.elements.search.android;
 
-import retrofit2.http.GET;
-import retrofit2.http.Query;
-import rx.Observable;
-import uk.os.elements.search.android.providers.opennames.service.model.ServerResponse;
+import org.junit.Test;
 
-public interface SearchApi {
+import static org.junit.Assert.*;
 
-    @GET("find?maxresults=25")
-    Observable<ServerResponse> search(@Query("key") String apiKey, @Query("query") String value);
-
-    
+/**
+ * To work on unit tests, switch the Test Artifact in the Build Variants view.
+ */
+public class ExampleUnitTest {
+    @Test
+    public void addition_isCorrect() throws Exception {
+        assertEquals(4, 2 + 2);
+    }
 }
