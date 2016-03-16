@@ -40,7 +40,7 @@
         </activity>
 
         <activity
-                android:name="uk.os.elements.search.android.app.SearchActivity">
+                android:name="uk.os.search.android.app.SearchActivity">
 
             <!--
             <meta-data android:name="opennames"
@@ -53,8 +53,8 @@
         </activity>
 
         <provider
-            android:name="uk.os.elements.search.android.recentmanager.impl.provider.content.RecentsProvider"
-            android:authorities="uk.os.elements.search.android.demo.recents"
+            android:name="uk.os.search.android.recentmanager.impl.provider.content.RecentsProvider"
+            android:authorities="uk.os.search.android.demo.recents"
             android:exported="false" />
 
     </application>

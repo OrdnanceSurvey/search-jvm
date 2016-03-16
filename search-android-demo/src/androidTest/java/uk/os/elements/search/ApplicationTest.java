@@ -1,4 +1,4 @@
-package uk.os.elements.search;
+package uk.os.search;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

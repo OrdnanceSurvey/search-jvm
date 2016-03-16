@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.os.elements.search.demo.android;
+package uk.os.search.android.demo;
 
 import org.junit.Test;
 

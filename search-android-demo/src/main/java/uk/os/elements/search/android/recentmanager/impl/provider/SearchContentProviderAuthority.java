@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package uk.os.elements.search.android.recentmanager.impl.provider;
+package uk.os.search.android.recentmanager.impl.provider;
 
 /**
  * Source: http://stackoverflow.com/questions/10790919/android-having-provider-authority-in-the-app-project/10791144#10791144
  */
 public class SearchContentProviderAuthority {
 
-    public static final String CONTENT_AUTHORITY = "uk.os.elements.search.android.demo";
+    public static final String CONTENT_AUTHORITY = "uk.os.search.android.demo";
 }
 
