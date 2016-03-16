@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  Copyright (C) 2016 Ordnance Survey
+  Copyright (C) 2016 The Android Open Source Project
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+
+<resources>
+
+    <!-- Please note: the style guideline sizes are all roughly golden ratio numbers -->
+    <!-- The base number is 48dp. -->
+    <!-- Sequence: 4, 7, 11, 18, 30, 48, 78, 125, 203, 329 -->
+    <!-- Where appropriate, the UI team permit us to round appropriately. -->
+
+    <!-- Throughout the app, the left and right is expected to have a visual 20dp margin -->
+    <dimen name="default_container_margin">20dp</dimen>
+    <!-- Single line list items should be 48dp, where the margin before the list is also 48dp -->
+    <dimen name="default_list_row_height">48dp</dimen>
+    <dimen name="default_rounded_corner_radius">4dp</dimen>
+
+    <dimen name="default_text_action_height">48dp</dimen>
+
+    <!-- Base Text Size -->
+    <dimen name="font_size_39">39sp</dimen>
+    <dimen name="font_size_24">24sp</dimen>
+    <dimen name="font_size_18">18sp</dimen>
+    <dimen name="font_size_15">15sp</dimen>
+    <dimen name="font_size_13">13sp</dimen>
+    <dimen name="font_size_10">10sp</dimen>
+
+    <!-- Base Margin -->
+    <dimen name="margin_3">3dp</dimen>
+    <dimen name="margin_5">5dp</dimen>
+    <dimen name="margin_10">10dp</dimen>
+    <dimen name="margin_15">15dp</dimen>
+    <dimen name="margin_20">20dp</dimen>
+    <dimen name="margin_30">30dp</dimen>
+
+    <!-- ScrollView/RecyclerView Scrollbars -->
+    <dimen name="osmap_scrollbar_thumb_width">3dp</dimen>
+    <dimen name="osmap_scrollbar_thumb_radius">2dp</dimen>
+
+    <!-- Primary Button (legacy) -->
+    <dimen name="button_primary_legacy_button_stroke">1dp</dimen>
+
+    <!-- OSMapsEditText -Error PopupView -->
+    <dimen name="osmap_edit_text_error_view_spacing">@dimen/margin_3</dimen>
+    <dimen name="osmap_edit_text_error_view_internal_spacing">@dimen/margin_10</dimen>
+
+    <!-- Search -->
+    <dimen name="search_item_padding">6dp</dimen>
+
+</resources>

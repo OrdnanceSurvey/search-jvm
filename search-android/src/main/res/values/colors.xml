@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  Copyright (C) 2016 Ordnance Survey
+  Copyright (C) 2016 The Android Open Source Project
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+
+<resources>
+
+    <!-- Defaults -->
+    <color name="primaryColor">@color/grey300</color>
+    <color name="primaryColorDark">@color/grey500</color>
+    <color name="secondaryColor">@color/grey900</color>
+    <color name="accentColor">@color/primaryColor</color>
+    <color name="default_background">@color/black</color>
+
+    <!-- Search -->
+    <color name="search_text_highlight">@color/white</color>
+
+    <!-- ====================================== Alpha Shades ====================================-->
+    <color name="white_10_percent">#1AFFFFFF</color>
+    <color name="white_15_percent">#26FFFFFF</color>
+    <color name="white_20_percent">#33FFFFFF</color>
+    <color name="white_30_percent">#4DFFFFFF</color>
+    <color name="white_50_percent">#80FFFFFF</color>
+    <color name="white_80_percent">#CCFFFFFF</color>
+    <color name="white_90_percent">#E6FFFFFF</color>
+
+    <color name="black_15_percent">#26000000</color>
+    <color name="black_25_percent">#40000000</color>
+    <color name="black_60_percent">#99000000</color>
+    <color name="black_90_percent">#E6000000</color>
+    <!-- ========================================================================================-->
+
+    <!-- ======================================= Custom Hues ====================================-->
+
+    <color name="red400">#EF5350</color>
+
+    <color name="light_blue300">#4FC3F7</color>
+
+    <color name="grey300">#E0E0E0</color>
+    <color name="grey500">#9E9E9E</color>
+    <color name="grey700">#616161</color>
+    <color name="grey900">#212121</color>
+
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="transparent">#00000000</color>
+
+    <!--
+    Note:
+    UK Government [1] mandate that all Government websites since 2009 must meet a minimum level of
+    accessibility, which is Level Double-A (or AA) of the W3C guidelines.
+    This is to help ensure that the Equality Act 2000 is not broken by digital products.
+
+    The snook.ca website [2] can be used to check colours if in doubt.
+
+    Greys:
+      > Lightest grey on white is grey600
+      > Darkest grey on black is grey500
+
+    [1]: https://www.gov.uk/service-manual/user-centred-design/accessibility
+    [2]: http://snook.ca/technical/colour_contrast/colour.html
+     -->
+
+    <!--#########################################################################################-->
+    <!--#########################################################################################-->
+    <!--#########################################################################################-->
+
+</resources>

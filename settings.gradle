@@ -1,1 +1,1 @@
-include ':search-java'
+include ':search-java', ':search-android', ':search-android-demo'

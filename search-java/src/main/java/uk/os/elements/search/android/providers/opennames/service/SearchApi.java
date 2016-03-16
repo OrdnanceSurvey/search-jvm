@@ -25,4 +25,6 @@ public interface SearchApi {
 
     @GET("find?maxresults=25")
     Observable<ServerResponse> search(@Query("key") String apiKey, @Query("query") String value);
+
+    
 }
