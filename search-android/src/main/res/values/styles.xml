@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  Copyright (C) 2016 Ordnance Survey
+  Copyright (C) 2016 The Android Open Source Project
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+
+<resources>
+    <style name="SearchTheme" parent="AppTheme.Base" />
+
+    <style name="AppTheme.Base" parent="@style/Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorPrimaryDark">@color/primaryColorDark</item>
+        <item name="colorAccent">@color/accentColor</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowBackground">@color/default_background</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:scrollbarThumbVertical">@drawable/scrollbar_thumb</item>
+        <item name="android:textColorSecondary">@color/white</item>
+    </style>
+
+    <style name="Error">
+        <item name="android:layout_marginLeft">@dimen/osmap_edit_text_error_view_spacing</item>
+        <item name="android:layout_marginRight">@dimen/osmap_edit_text_error_view_spacing</item>
+        <item name="android:padding">@dimen/osmap_edit_text_error_view_internal_spacing</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/red400</item>
+        <item name="android:textSize">@dimen/font_size_18</item>
+    </style>
+
+    <style name="TransparentButton">
+        <!--
+            Use AppCompat
+
+              >= 21 bordlerless circular ripple
+              <  21 square background.
+            Note: the up indicator is half the size of this ripple on API 23.
+            http://stackoverflow.com/questions/31941753/how-to-make-a-circular-ripple-on-a-button-when-its-being-clicked#answer-34388361
+         -->
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+    </style>
+
+    <style name="Source_Light">
+        <!-- TODO -->
+        <!--<item name="fontPath">fonts/SourceSansPro-Light.ttf</item>-->
+    </style>
+
+    <style name="Source24_Light" parent="Source_Light">
+        <item name="android:textSize">@dimen/font_size_24</item>
+    </style>
+
+    <style name="Source">
+        <!-- Default to system -   -->
+    </style>
+
+    <style name="Source13" parent="Source">
+        <item name="android:textSize">@dimen/font_size_13</item>
+    </style>
+
+    <style name="Source18" parent="Source">
+        <item name="android:textSize">@dimen/font_size_18</item>
+    </style>
+
+</resources>

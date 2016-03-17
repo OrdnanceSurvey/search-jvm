@@ -10,6 +10,12 @@ machine:
       - echo "signing.password=$PGP_PASSWORD" >> ~/.gradle/gradle.properties
       - echo "signing.secretKeyRingFile=$HOME/.gnupg/secring.gpg" >> ~/.gradle/gradle.properties
 
+dependencies:
+  pre:
+    - echo y | android update sdk --all --filter "tool,platform-tools,extra-google-m2repository, extra-android-m2repository, extra-android-support" --no-ui --force
+    - echo y | android update sdk --all --filter "tool" --no-ui --force
+    - echo y | android update sdk --all --filter "build-tools-23.0.2" --no-ui --force
+
 general:
   artifacts:
     - "search-java/build/reports" # relative to the build directory
