@@ -1,1 +1,5 @@
-include ':search-java', ':search-android', ':search-android-demo'
+include ':search-java'
+include ':search-android'
+include ':search-android-demo'
+
+rootProject.name = 'search-root'
