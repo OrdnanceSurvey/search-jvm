@@ -1,43 +1,18 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.0.0-beta6'
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
-
-
 apply plugin: 'com.android.library'
 
+
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 15
-        targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
-    // Sorry!
-    lintOptions {
-        abortOnError false
+        minSdkVersion rootProject.ext.minSdkVersion
     }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
+    testCompile deps.junit
 
     compile 'com.android.support:support-annotations:23.2.1'
     compile 'com.android.support:support-v4:23.2.1'
@@ -51,6 +26,4 @@ dependencies {
     compile project(':search-java')
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.11'
-}
+apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
