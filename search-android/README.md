@@ -5,14 +5,14 @@ Download
 
 Download the latest JAR or grab via Gradle:
 ```groovy
-compile 'uk.os.search:android:0.1.0'
+compile 'uk.os.search:android:1.0.0'
 ```
 or Maven:
 ```xml
 <dependency>
   <groupId>uk.os.search</groupId>
   <artifactId>android</artifactId>
-  <version>0.1.0</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 

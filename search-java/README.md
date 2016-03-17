@@ -14,7 +14,7 @@ It can be easily extended to include other data sources.
 include a gradle reference:
 
 ```gradle
-    compile 'uk.os.search:search:0.1.0'
+    compile 'uk.os.search:search:1.0.0'
 ```
 
 build the search manager:
