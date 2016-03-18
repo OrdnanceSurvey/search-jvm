@@ -11,7 +11,8 @@ Best of all, the code is open source so that you can match it with your specific
 
 **Master Build Status:** [![Circle CI](https://circleci.com/gh/OrdnanceSurvey/search-jvm/tree/master.svg?style=svg)](https://circleci.com/gh/OrdnanceSurvey/search-jvm/tree/master)
 
-**Test Coverage:** [![Coverage Status](https://coveralls.io/repos/github/OrdnanceSurvey/search-jvm/badge.svg?branch=master)](https://coveralls.io/github/OrdnanceSurvey/search-jvm?branch=master)
+**Test Coverage:** [![codecov.io](https://codecov.io/github/OrdnanceSurvey/search-jvm/coverage.svg?branch=master)](https://codecov.io/github/OrdnanceSurvey/search-jvm?branch=master)
+ [![Coverage Status](https://coveralls.io/repos/github/OrdnanceSurvey/search-jvm/badge.svg?branch=master)](https://coveralls.io/github/OrdnanceSurvey/search-jvm?branch=master)
 
 The library can be used directly from [Java](/search-java/README.md) or [Android](/search-android/README.md).  Once configured, you should be able to test using these example queries:
 
