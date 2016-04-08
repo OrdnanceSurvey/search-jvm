@@ -22,7 +22,7 @@ general:
 
 test:
    override:
-      - ./gradlew clean test
+      - ./gradlew clean test jacocoTestReport
    post:
    # See: https://circleci.com/docs/test-metadata#metadata-collection-in-custom-test-steps
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
