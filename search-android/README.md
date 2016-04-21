@@ -40,7 +40,7 @@ Specify your authority in Java
 package uk.os.search.android.recentmanager.impl.provider;
 
 public class SearchContentProviderAuthority {
-   public static final String CONTENT_AUTHORITY = "uk.os.search.android.demo";
+   public static final String CONTENT_AUTHORITY = "uk.os.search.android.yourauthority.recents";
 }
 ```
 
