@@ -16,16 +16,14 @@
 
 package uk.os.search.android.providers.recents;
 
-import com.esri.core.geometry.Envelope;
-
-import com.esri.core.geometry.Point;
-import com.esri.core.geometry.SpatialReference;
-import org.junit.Test;
-
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import rx.observers.TestSubscriber;
+import com.esri.core.geometry.Envelope;
+import com.esri.core.geometry.Point;
+import com.esri.core.geometry.SpatialReference;
+import org.junit.Test;
+import io.reactivex.observers.TestObserver;
 import uk.os.search.SearchResult;
 
 import static org.junit.Assert.assertEquals;
@@ -34,20 +32,20 @@ public class RecentManagerImplTest {
 
     @Test
     public void shouldSaveResultAndAllowQueryWithoutSubscription() throws Exception {
-        TestSubscriber<Void> testSubscriber = new TestSubscriber<>();
+        TestObserver<Void> testSubscriber = new TestObserver<>();
 
         RecentsManager recentsManager = getRecentsManager();
         recentsManager.saveRecent(createSearchResult("Test1", 10000)).subscribe(testSubscriber);
 
         testSubscriber.awaitTerminalEvent(3, TimeUnit.SECONDS);
         testSubscriber.assertNoErrors();
-        testSubscriber.assertCompleted();
+        testSubscriber.assertComplete();
 
-        TestSubscriber<List<SearchResult>> resultsSubscriber = new TestSubscriber<>();
+        TestObserver<List<SearchResult>> resultsSubscriber = new TestObserver<>();
         recentsManager.last(10).subscribe(resultsSubscriber);
         resultsSubscriber.awaitTerminalEvent(3, TimeUnit.SECONDS);
 
-        List<SearchResult> results = resultsSubscriber.getOnNextEvents().get(0);
+        List<SearchResult> results = resultsSubscriber.values().get(0);
         int expectedSize = 1;
         assertEquals(expectedSize, results.size());
 
@@ -56,7 +54,7 @@ public class RecentManagerImplTest {
         // just to prove a direct subscription isn't necessary
         Thread.sleep(1000);
 
-        List<SearchResult> finalResults = recentsManager.query(name).toBlocking().first();
+        List<SearchResult> finalResults = recentsManager.query(name).blockingFirst();
         SearchResult finalResult = finalResults.get(0);
         String expectedName = name;
         String actualName = finalResult.getName();
@@ -66,22 +64,22 @@ public class RecentManagerImplTest {
 
     @Test
     public void shouldSaveResultAndAllowQueryWhenSubscribed() throws Exception {
-        TestSubscriber<Void> saveSubscriber = new TestSubscriber<>();
+        TestObserver<Void> saveSubscriber = new TestObserver<>();
         RecentsManager recentsManager = getRecentsManager();
         recentsManager.saveRecent(createSearchResult("Test1", 10000)).subscribe(saveSubscriber);
         saveSubscriber.awaitTerminalEvent(3, TimeUnit.SECONDS);
 
-        TestSubscriber<List<SearchResult>> testSubscriber = new TestSubscriber<>();
+        TestObserver<List<SearchResult>> testSubscriber = new TestObserver<>();
         recentsManager.last(10).subscribe(testSubscriber);
         testSubscriber.awaitTerminalEvent(3, TimeUnit.SECONDS);
 
         testSubscriber.assertNoErrors();
 
         int expectedEmissions = 1;
-        int actualEmissions = testSubscriber.getOnNextEvents().size();
+        int actualEmissions = testSubscriber.values().size();
         assertEquals(expectedEmissions, actualEmissions);
 
-        List<SearchResult> result = testSubscriber.getOnNextEvents().get(0);
+        List<SearchResult> result = testSubscriber.values().get(0);
 
         int expectedSize = 1;
         int actualSize = result.size();
@@ -90,29 +88,30 @@ public class RecentManagerImplTest {
 
     @Test
     public void shouldReturnSingleResponseWithFourSearchResults() throws Exception {
-        RecentsManager recentsManager = getRecentsManagerWithResults();
+      RecentsManager recentsManager = getRecentsManagerWithResults();
 
-        TestSubscriber<List<SearchResult>> testSubscriber = new TestSubscriber<>();
-        recentsManager.last(10).subscribe(testSubscriber);
-        testSubscriber.awaitTerminalEvent();
+      TestObserver<List<SearchResult>> testSubscriber = recentsManager.last(10).subscribeWith(new TestObserver<List<SearchResult>>());
+      testSubscriber.awaitTerminalEvent();
+      testSubscriber.assertNoErrors();
+      testSubscriber.assertComplete();
 
-        testSubscriber.assertNoErrors();
-        testSubscriber.assertCompleted();
-        testSubscriber.assertUnsubscribed();
+      // isDisposed is an unreliable method of establishing whether something has completed
+      // See https://github.com/ReactiveX/RxJava/issues/5283
+      // assertTrue(testSubscriber.isDisposed());
 
-        int expectedResults = 1;
-        int actualResults = testSubscriber.getOnNextEvents().size();
-        assertEquals(expectedResults, actualResults);
+      int expectedResults = 1;
+      int actualResults = testSubscriber.values().size();
+      assertEquals(expectedResults, actualResults);
 
-        List<SearchResult> result = testSubscriber.getOnNextEvents().get(0);
-        int expectedSize = 4;
-        assertEquals(expectedSize, result.size());
+      List<SearchResult> result = testSubscriber.values().get(0);
+      int expectedSize = 4;
+      assertEquals(expectedSize, result.size());
 
-        // verify order of recents
-        assertEquals("Darkwood", result.get(0).getName());
-        assertEquals("Cobwood", result.get(1).getName());
-        assertEquals("Blackwood", result.get(2).getName());
-        assertEquals("Applewood", result.get(3).getName());
+      // verify order of recents
+      assertEquals("Darkwood", result.get(0).getName());
+      assertEquals("Cobwood", result.get(1).getName());
+      assertEquals("Blackwood", result.get(2).getName());
+      assertEquals("Applewood", result.get(3).getName());
     }
 
     private SearchResult createSearchResult(String name, double position) {
@@ -141,7 +140,7 @@ public class RecentManagerImplTest {
     }
 
     private void save(SearchResult searchResult, RecentsManager recentsManager) throws InterruptedException {
-        TestSubscriber<Void> testSubscriber = new TestSubscriber<>();
+        TestObserver<Void> testSubscriber = new TestObserver<>();
         recentsManager.saveRecent(searchResult).subscribe(testSubscriber);
         testSubscriber.awaitTerminalEvent(3, TimeUnit.SECONDS);
     }

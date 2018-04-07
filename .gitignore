@@ -38,3 +38,6 @@ captures/
 # Dev personal gradle properties
 gradle.properties
 
+# macOS
+.DS_Store
+

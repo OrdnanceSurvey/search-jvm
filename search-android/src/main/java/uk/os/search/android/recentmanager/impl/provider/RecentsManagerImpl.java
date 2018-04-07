@@ -19,22 +19,24 @@ package uk.os.search.android.recentmanager.impl.provider;
 import android.content.Context;
 import android.database.Cursor;
 
-import com.esri.core.geometry.Envelope;
-import com.esri.core.geometry.Point;
-import com.esri.core.geometry.SpatialReference;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.content.ContentObservable;
-import rx.functions.Func0;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
-import rx.subjects.AsyncSubject;
+import com.esri.core.geometry.Envelope;
+import com.esri.core.geometry.Point;
+import com.esri.core.geometry.SpatialReference;
+import com.squareup.sqlbrite3.BriteContentResolver;
+import com.squareup.sqlbrite3.SqlBrite;
+import io.reactivex.Completable;
+import io.reactivex.Observable;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.CompletableSubject;
 import uk.os.search.SearchResult;
+import uk.os.search.android.ContentObservable;
 import uk.os.search.android.providers.bng.OsGridReference;
 import uk.os.search.android.providers.latlon.LatLonResult;
 import uk.os.search.android.providers.recents.RecentsManager;
@@ -45,9 +47,13 @@ import uk.os.search.android.recentmanager.impl.provider.content.searchresult.Sea
 public class RecentsManagerImpl implements RecentsManager {
 
     private final Context mContext;
+    private final BriteContentResolver mResolver;
 
     public RecentsManagerImpl(Context context) {
         mContext = context;
+
+        SqlBrite sqlBrite = new SqlBrite.Builder().build();
+        mResolver = sqlBrite.wrapContentProvider(context.getContentResolver(), Schedulers.io());
     }
 
     @Override
@@ -58,22 +64,15 @@ public class RecentsManagerImpl implements RecentsManager {
                 SearchResultColumns.NAME, SearchResultColumns.CONTEXT);
         String[] restrictionArgs = new String[]{"%" + term + "%"};
 
-        Cursor cursor = mContext.getContentResolver().query(SearchResultColumns.CONTENT_URI, null,
-                restriction, restrictionArgs, SearchResultColumns.ACCESSED + " DESC");
-
-        if (cursor == null) {
-            List<SearchResult> empty = Collections.emptyList();
-            return Observable.just(empty);
-        }
-
-        return ContentObservable.fromCursor(cursor).map(new Func1<Cursor, SearchResult>() {
+        return mResolver.createQuery(SearchResultColumns.CONTENT_URI, null,
+            restriction, restrictionArgs, SearchResultColumns.ACCESSED + " DESC", false).mapToList(new Function<Cursor, SearchResult>() {
             @Override
-            public SearchResult call(Cursor cursor) {
+            public SearchResult apply(Cursor cursor) throws Exception {
                 String featureId = cursor
-                        .getString(cursor.getColumnIndex(SearchResultColumns.FEATUREID));
+                    .getString(cursor.getColumnIndex(SearchResultColumns.FEATUREID));
                 String name = cursor.getString(cursor.getColumnIndex(SearchResultColumns.NAME));
                 String context = cursor
-                        .getString(cursor.getColumnIndex(SearchResultColumns.CONTEXT));
+                    .getString(cursor.getColumnIndex(SearchResultColumns.CONTEXT));
                 Double x = cursor.getDouble(cursor.getColumnIndex(SearchResultColumns.X));
                 Double y = cursor.getDouble(cursor.getColumnIndex(SearchResultColumns.Y));
                 int srid = cursor.getInt(cursor.getColumnIndex(SearchResultColumns.SRID));
@@ -82,28 +81,33 @@ public class RecentsManagerImpl implements RecentsManager {
                 Double maxX = cursor.getDouble(cursor.getColumnIndex(SearchResultColumns.MAXX));
                 Double maxY = cursor.getDouble(cursor.getColumnIndex(SearchResultColumns.MAXY));
                 return new SearchResult(featureId, name, context, new Point(x, y),
-                        new Envelope(minX, minY, maxX, maxY), SpatialReference.create(srid));
+                    new Envelope(minX, minY, maxX, maxY), SpatialReference.create(srid));
             }
-        }).toList().subscribeOn(Schedulers.newThread());
+        }).subscribeOn(Schedulers.newThread()).doOnNext(new Consumer<List<SearchResult>>() {
+          @Override
+          public void accept(List<SearchResult> searchResults) throws Exception {
+            System.out.println("Results: " + searchResults.size());
+          }
+        });
     }
 
     @Override
     public Observable<List<SearchResult>> queryById(String... ids) {
-        SearchResultSelection selection = new SearchResultSelection();
-        selection.featureid(ids);
-        Cursor cursor = selection.query(mContext.getContentResolver());
+      SearchResultSelection selection = new SearchResultSelection();
+      selection.featureid(ids);
+      Cursor cursor = selection.query(mContext.getContentResolver());
 
-        if (cursor == null) {
-            List<SearchResult> empty = Collections.emptyList();
-            return Observable.just(empty);
+      if (cursor == null) {
+        List<SearchResult> empty = Collections.emptyList();
+        return Observable.just(empty);
+      }
+
+      return ContentObservable.fromCursor(cursor).map(new Function<Cursor, SearchResult>() {
+        @Override
+        public SearchResult apply(Cursor cursor) throws Exception {
+          return from(cursor);
         }
-
-        return ContentObservable.fromCursor(cursor).map(new Func1<Cursor, SearchResult>() {
-            @Override
-            public SearchResult call(Cursor cursor) {
-                return from(cursor);
-            }
-        }).toList().subscribeOn(Schedulers.newThread());
+      }).toList().toObservable().subscribeOn(Schedulers.newThread());
     }
 
     @Override
@@ -118,43 +122,41 @@ public class RecentsManagerImpl implements RecentsManager {
             return Observable.just(empty);
         }
 
-        return ContentObservable.fromCursor(cursor).map(new Func1<Cursor, SearchResult>() {
-            @Override
-            public SearchResult call(Cursor cursor) {
-                return from(cursor);
-            }
-        }).toList().subscribeOn(Schedulers.newThread());
+        return ContentObservable.fromCursor(cursor).map(new Function<Cursor, SearchResult>() {
+          @Override
+          public SearchResult apply(Cursor cursor) throws Exception {
+            return from(cursor);
+          }
+        }).toList().toObservable().subscribeOn(Schedulers.newThread());
     }
 
     @Override
-    public Observable<Void> saveRecent(final SearchResult searchResult) {
-        final AsyncSubject<Void> subject = AsyncSubject.create();
-        Observable
-                .defer(new Func0<Observable<Void>>() {
-                    @Override
-                    public Observable<Void> call() {
-                        return Observable.just(setRecent(searchResult));
-                    }
-                })
-                .subscribeOn(Schedulers.newThread())
-                .subscribe(subject);
+    public Completable saveRecent(final SearchResult searchResult) {
+      final CompletableSubject subject = CompletableSubject.create();
 
-        return subject;
-    }
-
-    @Override
-    public Observable<Void> updateRecent(final SearchResult searchResult) {
-        final AsyncSubject<Void> subject = AsyncSubject.create();
-        Observable.create(new Observable.OnSubscribe<Void>() {
-            @Override
-            public void call(Subscriber<? super Void> subscriber) {
-                SearchResultContentValues values = getValues(searchResult);
-                SearchResultSelection selection = new SearchResultSelection();
-                selection.featureid(searchResult.getId());
-                values.update(mContext.getContentResolver(), selection);
-            }
+        Completable.fromAction(new Action() {
+          @Override
+          public void run() throws Exception {
+            setRecent(searchResult);
+          }
         }).subscribeOn(Schedulers.newThread()).subscribe(subject);
         return subject;
+    }
+
+    @Override
+    public Completable updateRecent(final SearchResult searchResult) {
+      final CompletableSubject subject = CompletableSubject.create();
+
+      Completable.fromAction(new Action() {
+        @Override
+        public void run() throws Exception {
+          SearchResultContentValues values = getValues(searchResult);
+          SearchResultSelection selection = new SearchResultSelection();
+          selection.featureid(searchResult.getId());
+          values.update(mContext.getContentResolver(), selection);
+        }
+      }).subscribeOn(Schedulers.newThread()).subscribe(subject);
+      return subject;
     }
 
     private boolean anyNull(Cursor cursor, String[] columns) {

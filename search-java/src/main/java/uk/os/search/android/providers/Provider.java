@@ -18,7 +18,7 @@ package uk.os.search.android.providers;
 
 import java.util.List;
 
-import rx.Observable;
+import io.reactivex.Observable;
 import uk.os.search.SearchResult;
 
 public interface Provider {

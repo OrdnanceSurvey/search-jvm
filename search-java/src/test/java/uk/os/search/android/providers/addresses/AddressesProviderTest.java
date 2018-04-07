@@ -16,15 +16,15 @@
 
 package uk.os.search.android.providers.addresses;
 
+import java.io.IOException;
+
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import rx.Observable;
+import io.reactivex.Observable;
 import uk.os.search.android.providers.addresses.service.AddressApi;
 import uk.os.search.android.providers.addresses.service.model.ServerResponse;
-
-import java.io.IOException;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -62,7 +62,7 @@ public class AddressesProviderTest {
                 .queryUprn(false)
                 .build();
 
-        addressesProvider.query(QUERY, USER_LAT, USER_LON).toBlocking().first();
+        addressesProvider.query(QUERY, USER_LAT, USER_LON).blockingFirst();
         verify(addressApi, times(1)).bbox(API_KEY, BBOX_PARAM, PARAM_SRS, PARAM_OUTPUT_SRS);
         verify(addressApi, times(0)).find(anyString(), anyString(), anyInt(), anyString());
         verify(addressApi, times(0)).nearest(anyString(), anyString(), anyString(), anyString());
@@ -71,7 +71,7 @@ public class AddressesProviderTest {
         verify(addressApi, times(0)).uprn(anyString(), anyString(), anyString());
 
         // query without lat/lon should not query bounding box API
-        addressesProvider.query(QUERY).toBlocking().first();
+        addressesProvider.query(QUERY).blockingFirst();
         verify(addressApi, times(1)).bbox(API_KEY, BBOX_PARAM, PARAM_SRS, PARAM_OUTPUT_SRS);
     }
 
@@ -91,7 +91,7 @@ public class AddressesProviderTest {
                 .queryUprn(false)
                 .build();
 
-        addressesProvider.query(QUERY, USER_LAT, USER_LON).toBlocking().first();
+        addressesProvider.query(QUERY, USER_LAT, USER_LON).blockingFirst();
         verify(addressApi, times(0)).bbox(anyString(), anyString(), anyString(), anyString());
         verify(addressApi, times(1)).find(API_KEY, QUERY, PARAM_MAX_RESULTS, PARAM_OUTPUT_SRS);
         verify(addressApi, times(0)).nearest(anyString(), anyString(), anyString(), anyString());
@@ -99,7 +99,7 @@ public class AddressesProviderTest {
         verify(addressApi, times(0)).radius(anyString(), anyString(), anyString(), anyFloat(), anyString());
         verify(addressApi, times(0)).uprn(anyString(), anyString(), anyString());
 
-        addressesProvider.query(QUERY).toBlocking().first();
+        addressesProvider.query(QUERY).blockingFirst();
         verify(addressApi, times(2)).find(API_KEY, QUERY, PARAM_MAX_RESULTS, PARAM_OUTPUT_SRS);
     }
 
@@ -119,7 +119,7 @@ public class AddressesProviderTest {
                 .queryUprn(false)
                 .build();
 
-        addressesProvider.query(QUERY, USER_LAT, USER_LON).toBlocking().first();
+        addressesProvider.query(QUERY, USER_LAT, USER_LON).blockingFirst();
         verify(addressApi, times(0)).bbox(anyString(), anyString(), anyString(), anyString());
         verify(addressApi, times(0)).find(anyString(), anyString(), anyInt(), anyString());
         verify(addressApi, times(1)).nearest(API_KEY, POINT, PARAM_SRS, PARAM_OUTPUT_SRS);
@@ -128,7 +128,7 @@ public class AddressesProviderTest {
         verify(addressApi, times(0)).uprn(anyString(), anyString(), anyString());
 
         // nearest query without a lat/lon should not call backend
-        addressesProvider.query(QUERY).toBlocking().first();
+        addressesProvider.query(QUERY).blockingFirst();
         verify(addressApi, times(1)).nearest(API_KEY, POINT, PARAM_SRS, PARAM_OUTPUT_SRS);
     }
 
@@ -148,7 +148,7 @@ public class AddressesProviderTest {
                 .queryUprn(false)
                 .build();
 
-        addressesProvider.query(POSTCODE, USER_LAT, USER_LON).toBlocking().first();
+        addressesProvider.query(POSTCODE, USER_LAT, USER_LON).blockingFirst();
         verify(addressApi, times(0)).bbox(anyString(), anyString(), anyString(), anyString());
         verify(addressApi, times(0)).find(anyString(), anyString(), anyInt(), anyString());
         verify(addressApi, times(0)).nearest(anyString(), anyString(), anyString(), anyString());
@@ -156,7 +156,7 @@ public class AddressesProviderTest {
         verify(addressApi, times(0)).radius(anyString(), anyString(), anyString(), anyFloat(), anyString());
         verify(addressApi, times(0)).uprn(anyString(), anyString(), anyString());
 
-        addressesProvider.query(POSTCODE).toBlocking().first();
+        addressesProvider.query(POSTCODE).blockingFirst();
         verify(addressApi, times(2)).postcode(API_KEY, POSTCODE, PARAM_MAX_RESULTS, PARAM_OUTPUT_SRS);
     }
 
@@ -176,7 +176,7 @@ public class AddressesProviderTest {
                 .queryUprn(false)
                 .build();
 
-        addressesProvider.query(QUERY, USER_LAT, USER_LON).toBlocking().first();
+        addressesProvider.query(QUERY, USER_LAT, USER_LON).blockingFirst();
 
         verify(addressApi, times(0)).bbox(anyString(), anyString(), anyString(), anyString());
         verify(addressApi, times(0)).find(anyString(), anyString(), anyInt(), anyString());
@@ -186,7 +186,7 @@ public class AddressesProviderTest {
         verify(addressApi, times(0)).uprn(anyString(), anyString(), anyString());
 
         // a query without lat/lon should not trigger a radius call
-        addressesProvider.query(QUERY).toBlocking().first();
+        addressesProvider.query(QUERY).blockingFirst();
         verify(addressApi, times(1)).radius(API_KEY, POINT, PARAM_SRS, PARAM_RADIUS_METRES, PARAM_OUTPUT_SRS);
     }
 
@@ -208,7 +208,7 @@ public class AddressesProviderTest {
                 .queryUprn(true)
                 .build();
 
-        addressesProvider.query(query, USER_LAT, USER_LON).toBlocking().first();
+        addressesProvider.query(query, USER_LAT, USER_LON).blockingFirst();
 
         verify(addressApi, times(0)).bbox(anyString(), anyString(), anyString(), anyString());
         verify(addressApi, times(0)).find(anyString(), anyString(), anyInt(), anyString());
@@ -218,7 +218,7 @@ public class AddressesProviderTest {
         verify(addressApi, times(1)).uprn(API_KEY, query, PARAM_OUTPUT_SRS);
 
         // second query without lat/lon context
-        addressesProvider.query(query).toBlocking().first();
+        addressesProvider.query(query).blockingFirst();
         verify(addressApi, times(2)).uprn(API_KEY, query, PARAM_OUTPUT_SRS);
     }
 

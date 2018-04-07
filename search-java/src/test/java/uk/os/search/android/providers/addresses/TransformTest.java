@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import rx.Observable;
+import io.reactivex.Observable;
 import uk.os.search.SearchResult;
 import uk.os.search.android.providers.addresses.service.model.Header;
 import uk.os.search.android.providers.addresses.service.model.Result;
@@ -56,7 +56,7 @@ public class TransformTest {
         Observable<ServerResponse> response = Observable.just(serverResponse);
         List<Observable<ServerResponse>> list = new ArrayList<>();
         list.add(response);
-        Transform.toSearchResults(list).toBlocking().first();
+        Transform.toSearchResults(list).blockingFirst();
     }
 
     @Test
@@ -65,7 +65,7 @@ public class TransformTest {
         List<Observable<ServerResponse>> list = new ArrayList<>();
         list.add(response);
         Observable<List<SearchResult>> serverResults = Transform.toSearchResults(list);
-        List<SearchResult> results = serverResults.toBlocking().first();
+        List<SearchResult> results = serverResults.blockingFirst();
         assertTrue(results.size() == 1);
 
         SearchResult result = results.get(0);
@@ -115,7 +115,7 @@ public class TransformTest {
         Observable<ServerResponse> response = Observable.just(sr);
 
         // unsupported srid exception
-        Transform.toSearchResults(Arrays.asList(response)).toBlocking().first();
+        Transform.toSearchResults(Arrays.asList(response)).blockingFirst();
     }
 
     @Test
@@ -168,7 +168,7 @@ public class TransformTest {
             }
         });
 
-        List<SearchResult> result = Transform.toSearchResults(Arrays.asList(Observable.just(sr))).toBlocking().first();
+        List<SearchResult> result = Transform.toSearchResults(Arrays.asList(Observable.just(sr))).blockingFirst();
         SearchResult searchResult = result.get(0);
 
         // evidently further consideration could be made

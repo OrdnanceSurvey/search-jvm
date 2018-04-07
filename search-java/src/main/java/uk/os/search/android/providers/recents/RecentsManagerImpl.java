@@ -23,11 +23,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
-import rx.subjects.AsyncSubject;
+import io.reactivex.Completable;
+import io.reactivex.CompletableEmitter;
+import io.reactivex.CompletableOnSubscribe;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.CompletableSubject;
 import uk.os.search.SearchResult;
 import uk.os.search.android.providers.Provider;
 
@@ -57,9 +61,9 @@ public class RecentsManagerImpl implements Provider, RecentsManager {
     public Observable<List<SearchResult>> query(String searchTerm) {
         final String term = sanitised(searchTerm);
 
-        return Observable.create(new Observable.OnSubscribe<List<SearchResult>>() {
+        return Observable.create(new ObservableOnSubscribe<List<SearchResult>>() {
             @Override
-            public void call(Subscriber<? super List<SearchResult>> subscriber) {
+            public void subscribe(ObservableEmitter<List<SearchResult>> emitter) throws Exception {
                 try {
                     List<SearchResult> results = new ArrayList<>();
                     synchronized (mSearchResults) {
@@ -70,33 +74,35 @@ public class RecentsManagerImpl implements Provider, RecentsManager {
                             }
                         }
                     }
-                    if (!subscriber.isUnsubscribed()) {
+                    if (!emitter.isDisposed()) {
                         Collections.reverse(results);
-                        subscriber.onNext(results);
+                        emitter.onNext(results);
                     }
-                    if (!subscriber.isUnsubscribed()) {
-                        subscriber.onCompleted();
+                    if (!emitter.isDisposed()) {
+                        emitter.onComplete();
                     }
                 } catch (Exception e) {
-                    if (!subscriber.isUnsubscribed()) {
-                        subscriber.onError(e);
+                    if (!emitter.isDisposed()) {
+                        emitter.onError(e);
                     }
                 }
-            }
-        }).onErrorReturn(new Func1<Throwable, List<SearchResult>>() {
-            @Override
-            public List<SearchResult> call(Throwable throwable) {
-                return Collections.emptyList();
+
             }
         })
-        .subscribeOn(Schedulers.newThread());
+            .onErrorReturn(new Function<Throwable, List<SearchResult>>() {
+                @Override
+                public List<SearchResult> apply(Throwable throwable) throws Exception {
+                    return Collections.emptyList();
+                }
+            })
+            .subscribeOn(Schedulers.newThread());
     }
 
     @Override
     public Observable<List<SearchResult>> queryById(final String... ids) {
-        return Observable.create(new Observable.OnSubscribe<List<SearchResult>>() {
+        return Observable.create(new ObservableOnSubscribe<List<SearchResult>>() {
             @Override
-            public void call(Subscriber<? super List<SearchResult>> subscriber) {
+            public void subscribe(ObservableEmitter<List<SearchResult>> emitter) throws Exception {
                 try {
                     List<SearchResult> results = new ArrayList<>();
                     synchronized (mSearchResults) {
@@ -106,26 +112,28 @@ public class RecentsManagerImpl implements Provider, RecentsManager {
                             }
                         }
                     }
-                    if (!subscriber.isUnsubscribed()) {
-                        subscriber.onNext(results);
+                    if (!emitter.isDisposed()) {
+                        emitter.onNext(results);
 
                     }
-                    if (!subscriber.isUnsubscribed()) {
-                        subscriber.onCompleted();
+                    if (!emitter.isDisposed()) {
+                        emitter.onComplete();
                     }
                 } catch (Exception e) {
-                    subscriber.onError(e);
+                    emitter.onError(e);
                 }
             }
         }).subscribeOn(Schedulers.newThread());
     }
 
     @Override
-    public Observable<Void> saveRecent(final SearchResult searchResult) {
-        final AsyncSubject<Void> subject = AsyncSubject.create();
-        Observable.create(new Observable.OnSubscribe<Void>() {
+    public Completable saveRecent(final SearchResult searchResult) {
+        //DisposableCompletableObserver
+        final CompletableSubject subject = CompletableSubject.create();
+
+        Completable.create(new CompletableOnSubscribe() {
             @Override
-            public void call(Subscriber<? super Void> subscriber) {
+            public void subscribe(CompletableEmitter emitter) throws Exception {
                 try {
                     synchronized (mSearchResults) {
                         String key = searchResult.getId();
@@ -148,12 +156,12 @@ public class RecentsManagerImpl implements Provider, RecentsManager {
                         }
                     }
 
-                    if (!subscriber.isUnsubscribed()) {
-                        subscriber.onCompleted();
+                    if (!emitter.isDisposed()) {
+                        emitter.onComplete();
                     }
                 } catch (Exception e) {
-                    if (!subscriber.isUnsubscribed()) {
-                        subscriber.onError(e);
+                    if (!emitter.isDisposed()) {
+                        emitter.onError(e);
                     }
                 }
             }
@@ -163,11 +171,12 @@ public class RecentsManagerImpl implements Provider, RecentsManager {
     }
 
     @Override
-    public Observable<Void> updateRecent(final SearchResult latest) {
-        final AsyncSubject<Void> subject = AsyncSubject.create();
-        Observable.create(new Observable.OnSubscribe<Void>() {
+    public Completable updateRecent(final SearchResult latest) {
+        CompletableSubject subject = CompletableSubject.create();
+
+        Completable.create(new CompletableOnSubscribe() {
             @Override
-            public void call(Subscriber<? super Void> subscriber) {
+            public void subscribe(CompletableEmitter emitter) throws Exception {
                 try {
                     synchronized (mSearchResults) {
                         for (int i = 0; i < mSearchResults.size(); i++) {
@@ -180,18 +189,18 @@ public class RecentsManagerImpl implements Provider, RecentsManager {
                             }
                         }
                     }
-                    if (!subscriber.isUnsubscribed()) {
-                        subscriber.onCompleted();
+                    if (!emitter.isDisposed()) {
+                        emitter.onComplete();
                     }
                 } catch (Exception e) {
-                    if (!subscriber.isUnsubscribed()) {
-                        subscriber.onError(e);
+                    if (!emitter.isDisposed()) {
+                        emitter.onError(e);
                     }
                 }
             }
         })
-        .subscribeOn(Schedulers.newThread())
-        .subscribe(subject);
+            .subscribeOn(Schedulers.newThread())
+            .subscribe(subject);
         return subject;
     }
 

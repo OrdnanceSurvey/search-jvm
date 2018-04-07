@@ -42,19 +42,19 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.adapter.rxjava.HttpException;
-import uk.os.search.android.R;
-import uk.os.search.android.providers.bng.GridReferenceProvider;
-import uk.os.search.android.providers.latlon.LatLonProvider;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.HttpException;
 import timber.log.Timber;
 import uk.os.search.SearchBundle;
 import uk.os.search.SearchManager;
 import uk.os.search.SearchResult;
+import uk.os.search.android.R;
 import uk.os.search.android.providers.Provider;
+import uk.os.search.android.providers.bng.GridReferenceProvider;
+import uk.os.search.android.providers.latlon.LatLonProvider;
 import uk.os.search.android.providers.recents.RecentsManager;
 import uk.os.search.android.recentmanager.impl.provider.RecentsManagerImpl;
 import uk.os.search.android.util.RxUtil;
@@ -364,8 +364,9 @@ public class SearchActivity extends AppCompatActivity {
             }
         });
 
-        private Subscription mSubscription;
-        private Subscription mRecentsSubscription;
+        //private Subscription mSubscription;
+        private Disposable mSubscription;
+        private Disposable mRecentsSubscription;
 
         public QueryConcern() {
             mSearchPresenter = new SearchPresenter();
@@ -415,20 +416,20 @@ public class SearchActivity extends AppCompatActivity {
                     .last(10)
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<List<SearchResult>>() {
-                        @Override
-                        public void call(List<SearchResult> recents) {
-                            mRecentsOnlyPresenter.present(recents);
-                        }
-                    }, new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            // ignore
-                            mRecentsOnlyPresenter.present(throwable);
-                            mRecentsSubscription.unsubscribe();
-                            mRecentsSubscription = null;
-                        }
-                    });
+                .subscribe(new Consumer<List<SearchResult>>() {
+                    @Override
+                    public void accept(List<SearchResult> recents) throws Exception {
+                        mRecentsOnlyPresenter.present(recents);
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        // ignore
+                        mRecentsOnlyPresenter.present(throwable);
+                        mRecentsSubscription.dispose();
+                        mRecentsSubscription = null;
+                    }
+                });
         }
 
         public void query() {
@@ -442,26 +443,26 @@ public class SearchActivity extends AppCompatActivity {
         }
 
         private void query(String value) {
-            RxUtil.unsubscribe(mSubscription);
+            RxUtil.dispose(mSubscription);
             if (value.isEmpty()) {
                 return;
             }
             mSubscription = mSearchManager.query(value)
                     .subscribeOn(Schedulers.newThread())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<SearchBundle>() {
+                    .subscribe(new Consumer<SearchBundle>() {
                         @Override
-                        public void call(SearchBundle searchBundle) {
+                        public void accept(SearchBundle searchBundle) throws Exception {
                             mSearchPresenter.present(searchBundle);
-                            mSubscription.unsubscribe();
+                            mSubscription.dispose();
                             mSubscription = null;
                         }
-                    }, new Action1<Throwable>() {
+                    }, new Consumer<Throwable>() {
                         @Override
-                        public void call(Throwable throwable) {
+                        public void accept(Throwable throwable) throws Exception {
                             // note: this should never happen - time will tell
                             mSearchPresenter.presentError(throwable);
-                            mSubscription.unsubscribe();
+                            mSubscription.dispose();
                             mSubscription = null;
                         }
                     });

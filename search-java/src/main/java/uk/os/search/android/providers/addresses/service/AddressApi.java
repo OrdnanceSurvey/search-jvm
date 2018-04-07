@@ -16,9 +16,9 @@
 
 package uk.os.search.android.providers.addresses.service;
 
+import io.reactivex.Observable;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
-import rx.Observable;
 import uk.os.search.android.providers.addresses.service.model.ServerResponse;
 
 /**

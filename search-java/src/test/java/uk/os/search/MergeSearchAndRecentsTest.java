@@ -24,16 +24,15 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
+import io.reactivex.observers.TestObserver;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
-import rx.Observable;
-import rx.observers.TestSubscriber;
 import uk.os.search.android.providers.bng.GridReferenceProvider;
 import uk.os.search.android.providers.latlon.LatLonProvider;
 import uk.os.search.android.providers.opennames.OpennamesProvider;
@@ -65,7 +64,7 @@ public class MergeSearchAndRecentsTest {
         assertEquals(expected, actual);
 
         SearchResult third = searchBundle.getRemaining().get(2);
-        recentsManager.saveRecent(third).toBlocking().subscribe();
+        recentsManager.saveRecent(third).blockingAwait();
 
         searchBundle = query(searchManager, query);
         actual = searchBundle.getRecents().size();
@@ -89,7 +88,7 @@ public class MergeSearchAndRecentsTest {
         assertEquals(expected, actual);
 
         SearchResult sr = searchBundle.getRemaining().get(0);
-        recentsManager.saveRecent(sr).toBlocking().subscribe();
+        recentsManager.saveRecent(sr).blockingAwait();
         searchBundle = query(searchManager, query);
         actual = searchBundle.getRecents().size();
         expected = 1;
@@ -110,7 +109,7 @@ public class MergeSearchAndRecentsTest {
         assertFalse(hasErrors);
 
         SearchResult third = searchBundle.getRemaining().get(2);
-        recentsManager.saveRecent(third).toBlocking().subscribe();
+        recentsManager.saveRecent(third).blockingAwait();
 
         searchManager = getBrokenSearchManagerImpl(recentsManager);
         searchBundle = query(searchManager, query);
@@ -134,12 +133,11 @@ public class MergeSearchAndRecentsTest {
         SearchManager searchManager = getSearchManagerWithRecents(MockSupport.createCustomSearchResult("a", "Applewood",
                 1000), theDuplicate);
 
-        TestSubscriber<SearchBundle> testSubscriber = new TestSubscriber<>();
+        TestObserver<SearchBundle> testSubscriber = new TestObserver<>();
         searchManager.query(query).subscribe(testSubscriber);
-
         verify(testSubscriber);
 
-        SearchBundle result = testSubscriber.getOnNextEvents().get(0);
+        SearchBundle result = testSubscriber.values().get(0);
 
         // both results are returned because different IDs
         int expectedSize = 2;
@@ -149,12 +147,12 @@ public class MergeSearchAndRecentsTest {
         searchManager = getSearchManagerWithRecents(MockSupport.createCustomSearchResult("osgb4000000009438220",
                 "Applewood Extra", 1000), theDuplicate);
 
-        testSubscriber = new TestSubscriber<>();
+        testSubscriber = new TestObserver<>();
         searchManager.query(query).subscribe(testSubscriber);
 
         verify(testSubscriber);
 
-        result = testSubscriber.getOnNextEvents().get(0);
+        result = testSubscriber.values().get(0);
 
         // recent was found
         expectedSize = 1;
@@ -174,7 +172,7 @@ public class MergeSearchAndRecentsTest {
     private RecentsManager createRecentsManagerContaining(SearchResult... recents) {
         RecentsManager recentsManager = new RecentsManagerImpl();
         for (SearchResult searchResult : recents) {
-            recentsManager.saveRecent(searchResult).toBlocking().subscribe();
+            recentsManager.saveRecent(searchResult).blockingAwait();
         }
         return recentsManager;
     }
@@ -213,32 +211,27 @@ public class MergeSearchAndRecentsTest {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://localhost/broken/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
         return retrofit.create(SearchApi.class);
     }
 
     private SearchBundle query(SearchManager searchManager, String query) {
-        return searchManager.query(query).toBlocking().single();
+        return searchManager.query(query).blockingFirst();
     }
 
-    private void verify(TestSubscriber<SearchBundle> testSubscriber) {
+    private void verify(TestObserver<SearchBundle> testSubscriber) {
         testSubscriber.awaitTerminalEvent();
         testSubscriber.assertNoErrors();
-        testSubscriber.assertCompleted();
-        if (!testSubscriber.isUnsubscribed()) {
-            // try and give it time to sync
-            sleep(1000);
-        }
-        testSubscriber.assertUnsubscribed();
-    }
+        testSubscriber.assertComplete();
 
-    private void sleep(long time) {
-        try {
-            Thread.sleep(time);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // isDisposed is an unreliable method of establishing whether something has completed
+        // See https://github.com/ReactiveX/RxJava/issues/5283
+        //if (!testSubscriber.isDisposed()) {
+        //    // try and give it time to sync
+        //    sleep(1000);
+        //}
+        //assertTrue(testSubscriber.isDisposed());
     }
 
     private static class MockSupport {

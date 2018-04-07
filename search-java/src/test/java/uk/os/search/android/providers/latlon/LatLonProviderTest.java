@@ -146,7 +146,7 @@ public class LatLonProviderTest {
 
     private void checkit(String query, String expected, String expectedContext) {
         LatLonProvider latLonProvider = new LatLonProvider();
-        List<SearchResult> a = latLonProvider.query(query).toBlocking().single();
+        List<SearchResult> a = latLonProvider.query(query).blockingFirst();
         int expectedSize = 1;
         int actualSize = a.size();
         assertEquals(expectedSize, actualSize);
@@ -165,7 +165,7 @@ public class LatLonProviderTest {
 
     private void checkEmpty(String dmsQuery) {
         LatLonProvider latLonProvider = new LatLonProvider();
-        List<SearchResult> a = latLonProvider.query(dmsQuery).toBlocking().single();
+        List<SearchResult> a = latLonProvider.query(dmsQuery).blockingFirst();
         int expectedSize = 0;
         int actualSize = a.size();
         assertEquals(expectedSize, actualSize);
@@ -173,7 +173,7 @@ public class LatLonProviderTest {
 
     private void parseIt(String dmsQuery, double expectedLatitude, double expectedLongitude) {
         LatLonProvider latLonProvider = new LatLonProvider();
-        List<SearchResult> a = latLonProvider.query(dmsQuery).toBlocking().single();
+        List<SearchResult> a = latLonProvider.query(dmsQuery).blockingFirst();
         int expectedSize = 1;
         int actualSize = a.size();
         assertEquals(expectedSize, actualSize);

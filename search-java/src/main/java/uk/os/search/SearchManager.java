@@ -23,10 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import rx.Observable;
-import rx.functions.Func1;
-import rx.functions.Func2;
-import rx.functions.FuncN;
+import io.reactivex.Observable;
+import io.reactivex.functions.BiFunction;
+import io.reactivex.functions.Function;
 import uk.os.search.android.providers.Provider;
 import uk.os.search.android.providers.ProviderResponse;
 import uk.os.search.android.providers.addresses.AddressesProvider;
@@ -105,24 +104,25 @@ public class SearchManager {
         List<Observable<ProviderResponse>> streams = new ArrayList<>();
 
         for (final Provider p : mProviders) {
-            Observable<ProviderResponse> stream = p.query(searchTerm).map(new Func1<List<SearchResult>, ProviderResponse>() {
+            Observable<ProviderResponse> stream = p.query(searchTerm).map(new Function<List<SearchResult>, ProviderResponse>() {
                 @Override
-                public ProviderResponse call(List<SearchResult> searchResults) {
+                public ProviderResponse apply(List<SearchResult> searchResults) throws Exception {
                     return new ProviderResponse(p.getClass().getSimpleName(), searchResults);
                 }
-            }).onErrorReturn(new Func1<Throwable, ProviderResponse>() {
+            }).onErrorReturn(new Function<Throwable, ProviderResponse>() {
                 @Override
-                public ProviderResponse call(Throwable throwable) {
+                public ProviderResponse apply(Throwable throwable) throws Exception {
                     return new ProviderResponse(p.getClass().getSimpleName(),
-                            throwable);
+                        throwable);
                 }
             });
             streams.add(stream);
         }
 
-        Observable<List<ProviderResponse>> allResults = Observable.zip(streams, new FuncN<List<ProviderResponse>>() {
+        Observable<List<ProviderResponse>> allResults = Observable.zip(streams,
+            new Function<Object[], List<ProviderResponse>>() {
             @Override
-            public List<ProviderResponse> call(Object... args) {
+            public List<ProviderResponse> apply(Object[] args) throws Exception {
                 List<ProviderResponse> list = new ArrayList<>();
                 for (Object o : args) {
                     list.add((ProviderResponse)o);
@@ -133,19 +133,19 @@ public class SearchManager {
 
         boolean hasRecents = mRecentsManager != null;
         if (!hasRecents) {
-            return allResults.map(new Func1<List<ProviderResponse>, SearchBundle>() {
+            return allResults.map(new Function<List<ProviderResponse>, SearchBundle>() {
                 @Override
-                public SearchBundle call(List<ProviderResponse> providerResponses) {
+                public SearchBundle apply(List<ProviderResponse> providerResponses) throws Exception {
                     ProviderResponse recents = new ProviderResponse(Void.class.getName(),
-                            new ArrayList<SearchResult>());
+                        new ArrayList<SearchResult>());
                     return new SearchBundle(recents, providerResponses);
                 }
             });
         } else {
-            return allResults.flatMap(new Func1<List<ProviderResponse>,
-                    Observable<ProviderResponse>>() {
+            return allResults.flatMap(new Function<List<ProviderResponse>,
+                Observable<ProviderResponse>>() {
                 @Override
-                public Observable<ProviderResponse> call(List<ProviderResponse> providerResponses) {
+                public Observable<ProviderResponse> apply(List<ProviderResponse> providerResponses) throws Exception {
                     // check search resultset for even more recents (not found by recents matcher)
                     List<String> idsToCheck = new ArrayList<>();
                     for (ProviderResponse providerResponse : providerResponses) {
@@ -161,59 +161,59 @@ public class SearchManager {
                     if (!hasIdsToCheck) {
                         List<SearchResult> empty = Collections.emptyList();
                         ProviderResponse emptyProviderResponse = new ProviderResponse(sourceRecents,
-                                empty);
+                            empty);
                         return Observable.just(emptyProviderResponse);
                     } else {
                         String[] ids = idsToCheck.toArray(new String[idsToCheck.size()]);
-                        return mRecentsManager.queryById(ids).map(new Func1<List<SearchResult>, ProviderResponse>() {
+                        return mRecentsManager.queryById(ids).map(new Function<List<SearchResult>, ProviderResponse>() {
                             @Override
-                            public ProviderResponse call(List<SearchResult> searchResults) {
+                            public ProviderResponse apply(List<SearchResult> searchResults) throws Exception {
                                 return new ProviderResponse(sourceRecents, searchResults);
                             }
-                        }).onErrorReturn(new Func1<Throwable, ProviderResponse>() {
+                        }).onErrorReturn(new Function<Throwable, ProviderResponse>() {
                             @Override
-                            public ProviderResponse call(Throwable throwable) {
+                            public ProviderResponse apply(Throwable throwable) throws Exception {
                                 return new ProviderResponse(sourceRecents, throwable);
                             }
                         });
                     }
                 }
-            }, new Func2<List<ProviderResponse>, ProviderResponse, SearchBundle>() {
+            }, new BiFunction<List<ProviderResponse>, ProviderResponse, SearchBundle>() {
                 @Override
-                public SearchBundle call(List<ProviderResponse> providerResponses, ProviderResponse recentsResponse) {
+                public SearchBundle apply(List<ProviderResponse> providerResponses, ProviderResponse recentsResponse) throws Exception {
                     // essentially 'searchResponse.getSearchResults().removeAll(recents)'
                     // only execute a side effect here to update stale references
                     // TODO consider how best to update recents
                     boolean hasRecents = recentsResponse.getSearchResults().size() > 0;
                     if (hasRecents) {
                         RecentUtils
-                                .removeRecentsFromSearchResults(recentsResponse.getSearchResults(),
-                                        providerResponses, mRecentsManager);
+                            .removeRecentsFromSearchResults(recentsResponse.getSearchResults(),
+                                providerResponses, mRecentsManager);
                     }
                     return new SearchBundle(recentsResponse, providerResponses);
                 }
-            }).zipWith(mRecentsManager.query(searchTerm).map(new Func1<List<SearchResult>, ProviderResponse>() {
+            }).zipWith(mRecentsManager.query(searchTerm).map(new Function<List<SearchResult>, ProviderResponse>() {
                 @Override
-                public ProviderResponse call(List<SearchResult> searchResults) {
+                public ProviderResponse apply(List<SearchResult> searchResults) throws Exception {
                     return new ProviderResponse(RecentsManager.class.getSimpleName(), searchResults);
                 }
-            }).onErrorReturn(new Func1<Throwable, ProviderResponse>() {
-                        @Override
-                        public ProviderResponse call(Throwable throwable) {
-                            return new ProviderResponse(RecentsManager.class.getSimpleName(), throwable);
-                        }
-                    }), new Func2<SearchBundle, ProviderResponse, SearchBundle>() {
+            }).onErrorReturn(new Function<Throwable, ProviderResponse>() {
                 @Override
-                public SearchBundle call(SearchBundle searchBundle, ProviderResponse localMatches) {
+                public ProviderResponse apply(Throwable throwable) throws Exception {
+                    return new ProviderResponse(RecentsManager.class.getSimpleName(), throwable);
+                }
+            }), new BiFunction<SearchBundle, ProviderResponse, SearchBundle>() {
+                @Override
+                public SearchBundle apply(SearchBundle searchBundle, ProviderResponse localMatches) throws Exception {
                     if (localMatches.hasError()) {
                         return new SearchBundle(localMatches, searchBundle.getRemainingResponses());
                     } else {
                         // TODO: handle recent scoring here for that perfect ordering ;)
                         List<SearchResult> recentsPass2 = concateExcludeDuplicates(localMatches.getSearchResults(),
-                                searchBundle.getRecents());
+                            searchBundle.getRecents());
                         final String sourceRecents = RecentsManager.class.getSimpleName();
                         return new SearchBundle(new ProviderResponse(sourceRecents, recentsPass2),
-                                searchBundle.getRemainingResponses());
+                            searchBundle.getRemainingResponses());
                     }
                 }
             });

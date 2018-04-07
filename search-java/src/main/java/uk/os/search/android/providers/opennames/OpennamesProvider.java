@@ -25,11 +25,11 @@ import java.util.Map;
 
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.SpatialReference;
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
-import rx.Observable;
-import rx.functions.Func1;
 import uk.os.search.SearchResult;
 import uk.os.search.android.providers.Provider;
 import uk.os.search.android.providers.opennames.service.SearchApi;
@@ -66,9 +66,9 @@ public class OpennamesProvider implements Provider {
     }
 
     public Observable<List<SearchResult>> query(String searchTerm) {
-        return mSearchApi.search(mKey, searchTerm).map(new Func1<ServerResponse, List<SearchResult>>() {
+        return mSearchApi.search(mKey, searchTerm).map(new Function<ServerResponse, List<SearchResult>>() {
             @Override
-            public List<SearchResult> call(ServerResponse serverResponse) {
+            public List<SearchResult> apply(ServerResponse serverResponse) throws Exception {
                 int capacity = serverResponse.getResults().size();
                 List<SearchResult> list = new ArrayList<>(capacity);
 
@@ -182,7 +182,7 @@ public class OpennamesProvider implements Provider {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.ordnancesurvey.co.uk/opennames/v1/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
         return retrofit.create(SearchApi.class);
     }

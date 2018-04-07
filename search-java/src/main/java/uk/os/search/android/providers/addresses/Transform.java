@@ -19,9 +19,8 @@ package uk.os.search.android.providers.addresses;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.SpatialReference;
-import rx.Observable;
-import rx.functions.Func1;
-import rx.functions.FuncN;
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
 import uk.os.search.SearchResult;
 import uk.os.search.android.providers.addresses.service.model.Result;
 import uk.os.search.android.providers.addresses.service.model.ServerResponse;
@@ -43,13 +42,11 @@ final class Transform {
         }
 
         // Zip SearchResult lists
-        Observable<List<SearchResult>> zipped = Observable.zip(transformedResults, new FuncN<List<SearchResult>>() {
-
-            @SuppressWarnings("unchecked")
+        Observable<List<SearchResult>> zipped = Observable.zip(transformedResults, new Function<Object[], List<SearchResult>>() {
             @Override
-            public List<SearchResult> call(Object... args) {
+            public List<SearchResult> apply(Object[] objects) throws Exception {
                 List<SearchResult> result = new ArrayList<>();
-                for (Object obj : args) {
+                for (Object obj : objects) {
                     result.addAll((List<SearchResult>) obj);
                 }
                 return result;
@@ -96,10 +93,10 @@ final class Transform {
         }
     }
 
-    private static Func1<ServerResponse, List<SearchResult>> searchResultsFromServerResponse() {
-        return new Func1<ServerResponse, List<SearchResult>>() {
+    private static Function<ServerResponse, List<SearchResult>> searchResultsFromServerResponse() {
+        return new Function<ServerResponse, List<SearchResult>>() {
             @Override
-            public List<SearchResult> call(ServerResponse serverResponse) {
+            public List<SearchResult> apply(ServerResponse serverResponse) throws Exception {
                 int capacity = serverResponse.getResults().size();
                 List<SearchResult> list = new ArrayList<>(capacity);
 

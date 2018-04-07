@@ -23,7 +23,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import rx.Observable;
+import io.reactivex.Observable;
 import uk.os.search.android.providers.Provider;
 import uk.os.search.android.providers.bng.GridReferenceProvider;
 import uk.os.search.android.providers.latlon.LatLonProvider;
@@ -46,8 +46,8 @@ public class SearchManagerTest {
     public void shouldHaveLatLonAndGridReferenceDefaultProviders() {
         SearchManager searchManager = new SearchManager();
         assertNotNull(searchManager);
-        assertNotNull(searchManager.query("51, 0").toBlocking().first());
-        assertNotNull(searchManager.query("SU 37290 15512").toBlocking().first());
+        assertNotNull(searchManager.query("51, 0").blockingFirst());
+        assertNotNull(searchManager.query("SU 37290 15512").blockingFirst());
     }
 
     @Test
@@ -79,7 +79,7 @@ public class SearchManagerTest {
         List<Provider> providers = new ArrayList<>();
         providers.add(latLonProvider);
         SearchManager searchManager = new SearchManager.Builder().setRecentsManager(recentsManager).setProviders(providers).build();
-        SearchBundle searchBundle = searchManager.query(Query.input).toBlocking().single();
+        SearchBundle searchBundle = searchManager.query(Query.input).blockingFirst();
 
         boolean isErrorCaptured = searchBundle.getErrors().contains(error);
         assertTrue(isErrorCaptured);
@@ -110,7 +110,7 @@ public class SearchManagerTest {
         List<Provider> providers = new ArrayList<>();
         providers.add(latLonProvider);
         SearchManager searchManager = new SearchManager.Builder().setRecentsManager(recentsManager).setProviders(providers).build();
-        SearchBundle searchBundle = searchManager.query(Query.input).toBlocking().single();
+        SearchBundle searchBundle = searchManager.query(Query.input).blockingFirst();
         String expected = Query.Database.HasData.name;
         String actual = searchBundle.getRecents().get(0).getName();
         assertEquals(expected, actual);
@@ -154,7 +154,7 @@ public class SearchManagerTest {
         providers.add(latLonProvider);
         providers.add(opennamesProvider);
         SearchManager searchManager = new SearchManager.Builder().setRecentsManager(recentsManager).setProviders(providers).build();
-        SearchBundle searchBundle = searchManager.query(Query.input).toBlocking().single();
+        SearchBundle searchBundle = searchManager.query(Query.input).blockingFirst();
         String expected = Query.Database.HasData.name;
         String actual = searchBundle.getRecents().get(0).getName();
         assertEquals(expected, actual);
@@ -176,7 +176,7 @@ public class SearchManagerTest {
                 .setRecentsManager(recentsManager)
                 .setProviders(latLonProvider)
                 .build();
-        SearchBundle searchBundle = searchManager.query(Query.input).toBlocking().single();
+        SearchBundle searchBundle = searchManager.query(Query.input).blockingFirst();
 
         assertTrue(searchBundle.getRecents().size() == 1);
         assertTrue(searchBundle.getRemaining().size() == 0);
@@ -194,7 +194,7 @@ public class SearchManagerTest {
         List<Provider> providers = new ArrayList<>();
         providers.add(latLonProvider);
         SearchManager searchManager = new SearchManager.Builder().setRecentsManager(recentsManager).setProviders(providers).build();
-        SearchBundle searchBundle = searchManager.query(Query.input).toBlocking().single();
+        SearchBundle searchBundle = searchManager.query(Query.input).blockingFirst();
         String expected = Query.Database.HasData.name;
         String actual = searchBundle.getRecents().get(0).getName();
         assertEquals(expected, actual);
@@ -209,7 +209,7 @@ public class SearchManagerTest {
         when(latLonProvider.query(Query.input)).then(Query.Database.HasData.response);
 
         SearchManager searchManager = new SearchManager.Builder().setProviders(latLonProvider).build();
-        SearchBundle searchBundle = searchManager.query(Query.input).toBlocking().single();
+        SearchBundle searchBundle = searchManager.query(Query.input).blockingFirst();
         String expected = Query.Database.HasData.name;
         String actual = searchBundle.getRemaining().get(0).getName();
         assertEquals(expected, actual);
@@ -234,7 +234,7 @@ public class SearchManagerTest {
                 .setRecentsManager(recentsManager)
                 .setProviders(gridReferenceProvider, opennamesProvider, latLonProvider)
                 .build();
-        SearchBundle searchBundle = searchManager.query(Query.input).toBlocking().single();
+        SearchBundle searchBundle = searchManager.query(Query.input).blockingFirst();
         String expected = Query.Database.HasData.name;
         String actual = searchBundle.getRemaining().get(0).getName();
         assertEquals(expected, actual);

@@ -18,7 +18,8 @@ package uk.os.search.android.providers.recents;
 
 import java.util.List;
 
-import rx.Observable;
+import io.reactivex.Completable;
+import io.reactivex.Observable;
 import uk.os.search.SearchResult;
 
 public interface RecentsManager {
@@ -44,16 +45,14 @@ public interface RecentsManager {
     /**
      * note: [sh/c]ould store the actual query they entered
      * @param searchResult add a search result to the recent queries list.
-     * @return an optional observable to allowing subscription to {Subscriber#onNext},
-     * {Subscriber#onComplete} and {Subscriber#onError}
+     * @return a Completable which terminates successfully or errors
      */
-    Observable<Void> saveRecent(SearchResult searchResult);
+    Completable saveRecent(SearchResult searchResult);
 
     /**
      * If stale recent data is detected then the latest data can be returned here to update
      * @param latest latest data to replace any existing SearchResult with a given ID
-     * @return an optional observable to allowing subscription to {Subscriber#onNext},
-     * {Subscriber#onComplete} and {Subscriber#onError}
+     * @return a Completable which terminates successfully or errors
      */
-    Observable<Void> updateRecent(SearchResult latest);
+    Completable updateRecent(SearchResult latest);
 }

@@ -16,11 +16,11 @@
 
 package uk.os.search.android.providers.opennames;
 
+import io.reactivex.Observable;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import rx.Observable;
 import uk.os.search.android.providers.opennames.service.SearchApi;
 import uk.os.search.android.providers.opennames.service.model.ServerResponse;
 
@@ -43,10 +43,10 @@ public class OpennamesProviderTest {
         });
 
         OpennamesProvider opennamesProvider = new OpennamesProvider.Builder(API_KEY).setSearchApi(searchApi).build();
-        opennamesProvider.query(LONDON).toBlocking().first();
+        opennamesProvider.query(LONDON).blockingFirst();
         verify(searchApi, times(1)).search(API_KEY, LONDON);
 
-        opennamesProvider.query(EMPTY).toBlocking().first();
+        opennamesProvider.query(EMPTY).blockingFirst();
         verify(searchApi, times(1)).search(API_KEY, EMPTY);
     }
 }

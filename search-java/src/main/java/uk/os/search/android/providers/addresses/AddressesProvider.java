@@ -16,11 +16,11 @@
 
 package uk.os.search.android.providers.addresses;
 
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
-import rx.Observable;
-import rx.functions.Func1;
 import uk.os.search.SearchResult;
 import uk.os.search.android.providers.Provider;
 import uk.os.search.android.providers.addresses.service.AddressApi;
@@ -169,10 +169,10 @@ public class AddressesProvider implements Provider {
         return list;
     }
 
-    private Func1<List<SearchResult>, List<SearchResult>> deduplicate() {
-        return new Func1<List<SearchResult>, List<SearchResult>>() {
+    private Function<List<SearchResult>, List<SearchResult>> deduplicate() {
+        return new Function<List<SearchResult>, List<SearchResult>>() {
             @Override
-            public List<SearchResult> call(List<SearchResult> results) {
+            public List<SearchResult> apply(List<SearchResult> results) throws Exception {
                 Set<String> set = new HashSet<>();
                 List<SearchResult> betterResult = new ArrayList<>();
 
@@ -192,7 +192,7 @@ public class AddressesProvider implements Provider {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.ordnancesurvey.co.uk/places/v1/")
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
         return retrofit.create(AddressApi.class);
     }

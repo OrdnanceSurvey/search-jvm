@@ -16,15 +16,15 @@
 
 package uk.os.search.android.util;
 
-import rx.Subscription;
+import io.reactivex.disposables.Disposable;
 
 public final class RxUtil {
 
     private RxUtil() { }
 
-    public static void unsubscribe(final Subscription subscription) {
-        if (subscription != null && !subscription.isUnsubscribed()) {
-            subscription.unsubscribe();
+    public static void dispose(final Disposable disposable) {
+        if (disposable != null && !disposable.isDisposed()) {
+            disposable.dispose();
         }
     }
 }
