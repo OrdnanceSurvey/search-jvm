@@ -1,0 +1,91 @@
+# Java Gradle CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      # specify the version you desire here
+      - image: circleci/android:api-26-node8-alpha
+      # REMOVE - image: circleci/openjdk:8-jdk
+      
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/postgres:9.4
+
+    working_directory: ~/repo
+
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+    
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ .Branch }}-{{ checksum "build.gradle" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: echo "We are running:"
+      - run: java -version
+      - run: whoami
+      - run: ./gradlew dependencies
+
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-dependencies-{{ .Branch }}-{{ checksum "build.gradle" }}
+        
+      - run: echo "$TESTING_ENV" > output.txt
+      - run: cat output.txt
+
+      - run:
+          name: Reset GnuPG
+          shell: /bin/bash -euo pipefail
+          command: |
+            sudo chown -R circleci:circleci ~/.gnupg
+            sudo rm -Rf ~/.gnupg
+            mkdir ~/.gnupg
+              
+      # run signing config
+      # the gradle plugin only works with legacy pgp files, PGP version 2.1 stable debian still has
+      # outstanding issues with passphrase entry etc.
+      - run:
+          name: Signing Configuration
+          shell: /bin/bash -euo pipefail
+          command: |
+            echo $PGP_KEY | base64 --decode > ~/sec_key.gpg
+            gpg --batch --import ~/sec_key.gpg
+            rm ~/sec_key.gpg
+            echo "legacy export for gradle plugin"
+            echo "loopback is required for the current version of PGP in debian - it shouldn't be necessary in the future"
+            gpg --keyring secring.gpg --export-secret-keys --pinentry-mode loopback --passphrase $PGP_PASSWORD > ~/.gnupg/secring.gpg
+            mkdir -p ~/.gradle
+            echo "signing.keyId=$PGP_KEY_ID" >> ~/.gradle/gradle.properties
+            echo "signing.password=$PGP_PASSWORD" >> ~/.gradle/gradle.properties
+            echo "signing.secretKeyRingFile=$HOME/.gnupg/secring.gpg" >> ~/.gradle/gradle.properties            
+        
+#      # run tests!
+#      - run: ./gradlew test
+#      # build it
+#      - run: ./gradlew build
+
+      - run:
+          name: Upload if master branch
+          shell: /bin/bash -euo pipefail
+          command: |
+            if [ $CIRCLE_BRANCH = 'feature/circleci' ]; then
+              echo "master"
+              ./gradlew clean test uploadArchives
+            else
+              echo "not master!"
+              ./gradlew test
+              ./gradlew build
+            fi
+            
